@@ -59,3 +59,17 @@ def test_7_night_fixture(grid):
 def test_empty_html_raises():
     with pytest.raises(ParseError):
         parse_grid("<table></table>")
+
+
+def test_all_packages_parsed(grid):
+    rates = grid.rooms["1BED"].rates
+    assert list(rates) == [
+        "Standard Rate | Breakfast",
+        "Standard Rate | Half Board Plus",
+        "Standard Rate | All Inclusive",
+    ]
+    assert rates["Standard Rate | Breakfast"][date(2027, 8, 20)] == 280
+    assert rates["Standard Rate | Half Board Plus"][date(2027, 8, 20)] == 340
+    assert rates["Standard Rate | All Inclusive"][date(2027, 8, 20)] == 390
+    assert rates["Standard Rate | All Inclusive"][date(2027, 8, 14)] is None
+    assert grid.rooms["1BED"].nights == rates["Standard Rate | Breakfast"]

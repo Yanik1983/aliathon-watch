@@ -43,6 +43,10 @@ a.book { display:inline-block; margin-left:8px; padding:4px 10px; background:var
          border-radius:6px; text-decoration:none; font-weight:600; }
 .legend span { display:inline-block; padding:2px 8px; border-radius:4px; margin-right:8px; }
 footer { color:var(--muted); font-size:12px; margin-top:16px; }
+.rate-btn { margin:0 6px 6px 0; padding:4px 10px; border:1px solid var(--line); border-radius:6px;
+            background:var(--card); color:var(--fg); cursor:pointer; font:inherit; }
+.rate-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+h3 { font-size:1rem; margin:16px 0 6px; }
 """
 
 
@@ -130,6 +134,11 @@ _CHART_JS = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min
 _PALETTE = ["#0b5ed7", "#d63384", "#198754", "#fd7e14", "#6f42c1", "#20c997", "#dc3545", "#6c757d"]
 
 
+def _short_rate(rate: str) -> str:
+    """'Standard Rate | Breakfast' -> 'Breakfast'."""
+    return rate.split("|")[-1].strip() if "|" in rate else rate
+
+
 def _history_section(history: list[dict]) -> str:
     series = history_mod.series(history)
     if not series:
@@ -137,46 +146,77 @@ def _history_section(history: list[dict]) -> str:
             '<section class="card" id="history"><h2>Price history</h2>'
             "<p>No history yet. A point is recorded every time a price or availability changes.</p></section>"
         )
+    rates = history_mod.rate_names(history)
     ordered = [c for c in config.TARGET_ROOMS if c in series] + [
         c for c in series if c not in config.TARGET_ROOMS
     ]
     datasets = []
     for i, code in enumerate(ordered):
-        pts = [{"x": t, "y": price} for t, price in series[code]["points"]]
-        datasets.append(
-            {
-                "label": series[code]["name"],
-                "data": pts,
-                "borderColor": _PALETTE[i % len(_PALETTE)],
-                "backgroundColor": _PALETTE[i % len(_PALETTE)],
-                "borderWidth": 3 if code in config.TARGET_ROOMS else 1.5,
-                "pointRadius": 3,
-                "stepped": True,
-                "spanGaps": False,
-            }
-        )
+        for rate in rates:
+            pts = series[code]["rates"].get(rate)
+            if not pts:
+                continue
+            datasets.append(
+                {
+                    "label": series[code]["name"],
+                    "rate": rate,
+                    "data": [{"x": t, "y": price} for t, price in pts],
+                    "borderColor": _PALETTE[i % len(_PALETTE)],
+                    "backgroundColor": _PALETTE[i % len(_PALETTE)],
+                    "borderWidth": 3 if code in config.TARGET_ROOMS else 1.5,
+                    "pointRadius": 3,
+                    "stepped": True,
+                    "spanGaps": False,
+                    "hidden": rate != rates[0],
+                }
+            )
+
+    # Table: room x package. Cell = price now, change since first seen,
+    # and for non-base packages the pattern (difference vs the base package).
+    base = rates[0] if rates else ""
+    head = "".join(
+        f"<th>{htmllib.escape(_short_rate(r))}"
+        + (f"<br><small>vs {htmllib.escape(_short_rate(base))}</small>" if r != base else "")
+        + "</th>"
+        for r in rates
+    )
     rows = []
     for code in ordered:
-        pts = series[code]["points"]
-        first = next((p for _, p in pts if p is not None), None)
-        now = pts[-1][1]
-        if first is None or now is None:
-            delta = "n/a" if now is None else "new"
-        else:
-            diff = now - first
-            delta = f"{'+' if diff > 0 else ''}{diff}"
-        first_s = f"€{first}" if first is not None else "—"
-        now_s = f"€{now}" if now is not None else "sold out"
+        cells = []
+        base_now = None
+        for rate in rates:
+            pts = series[code]["rates"].get(rate) or []
+            first = next((p for _, p in pts if p is not None), None)
+            now = pts[-1][1] if pts else None
+            if rate == base:
+                base_now = now
+            if now is None:
+                cell = "sold out" if pts else "—"
+            else:
+                cell = f"€{now}"
+                if first is not None and first != now:
+                    diff = now - first
+                    cell += f' <small>({"+" if diff > 0 else ""}{diff} since first)</small>'
+                if rate != base and base_now is not None:
+                    cell += f" <small>(+{now - base_now})</small>"
+            cells.append(f"<td>{cell}</td>")
         rows.append(
-            f'<tr><td class="room">{htmllib.escape(series[code]["name"])}</td>'
-            f"<td>{first_s}</td><td>{now_s}</td><td>{delta}</td></tr>"
+            f'<tr><td class="room">{htmllib.escape(series[code]["name"])}</td>{"".join(cells)}</tr>'
         )
+
     first_t = history[0]["t"][:10]
+    buttons = "".join(
+        f'<button type="button" class="rate-btn{" active" if r == base else ""}" data-rate="{htmllib.escape(r)}">'
+        f"{htmllib.escape(_short_rate(r))}</button>"
+        for r in rates
+    )
     payload = json.dumps(datasets).replace("</", "<\\/")
     return f"""<section class="card" id="history"><h2>Price history</h2>
 <p class="sub">Lowest open-night price per room type, EUR per night, since {first_t}. {len(history)} change(s) recorded; a point is added only when a price or availability changes.</p>
+<p class="rate-btns">Package: {buttons}</p>
 <div style="position:relative;height:340px"><canvas id="priceChart"></canvas></div>
-<div class="wrap"><table><thead><tr><th class="room">Room</th><th>First seen</th><th>Now</th><th>Change</th></tr></thead>
+<h3>Packages now</h3>
+<div class="wrap"><table><thead><tr><th class="room">Room</th>{head}</tr></thead>
 <tbody>{"".join(rows)}</tbody></table></div>
 <script src="{_CHART_JS}"></script>
 <script>
@@ -187,7 +227,7 @@ def _history_section(history: list[dict]) -> str:
   var fg = dark ? '#ddd' : '#333', grid = dark ? '#333' : '#e5e5e5';
   function fmt(ms){{ return new Date(ms).toISOString().slice(0,10); }}
   if (!window.Chart) {{ document.getElementById('priceChart').outerHTML = '<p>Chart library failed to load.</p>'; return; }}
-  new Chart(document.getElementById('priceChart'), {{
+  var chart = new Chart(document.getElementById('priceChart'), {{
     type: 'line',
     data: {{datasets: datasets}},
     options: {{
@@ -198,11 +238,19 @@ def _history_section(history: list[dict]) -> str:
         y: {{ticks: {{color: fg, callback: function(v){{ return '€' + v; }}}}, grid: {{color: grid}}, title: {{display: true, text: 'EUR / night', color: fg}}}}
       }},
       plugins: {{
-        legend: {{labels: {{color: fg}}}},
+        legend: {{labels: {{color: fg, filter: function(item, data){{ return !data.datasets[item.datasetIndex].hidden; }}}}}},
         tooltip: {{callbacks: {{title: function(items){{ return new Date(items[0].parsed.x).toUTCString().slice(0,22); }},
-                               label: function(c){{ return c.dataset.label + ': €' + c.parsed.y; }}}}}}
+                               label: function(c){{ return c.dataset.label + ' (' + c.dataset.rate.split('|').pop().trim() + '): €' + c.parsed.y; }}}}}}
       }}
     }}
+  }});
+  document.querySelectorAll('.rate-btn').forEach(function(btn){{
+    btn.addEventListener('click', function(){{
+      var rate = btn.getAttribute('data-rate');
+      document.querySelectorAll('.rate-btn').forEach(function(b){{ b.classList.toggle('active', b === btn); }});
+      chart.data.datasets.forEach(function(d, i){{ chart.setDatasetVisibility(i, d.rate === rate); d.hidden = d.rate !== rate; }});
+      chart.update();
+    }});
   }});
 }})();
 </script>

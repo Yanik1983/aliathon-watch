@@ -93,5 +93,24 @@ def test_history_chart_embedded():
     assert '"label": "One Bedroom Apartment"' in page
     assert '"y": 280' in page
     assert "1 change(s) recorded" in page
-    # summary table row for Studio: first 260, now 260, change 0
-    assert "<td>€260</td><td>€260</td><td>0</td>" in page
+    # one dataset per room x package, only the first package visible at load
+    assert page.count('"rate": "Standard Rate | All Inclusive"') == 8
+    assert page.count('"hidden": false') == 8
+    assert page.count('"hidden": true') == 16
+    # package buttons
+    assert 'data-rate="Standard Rate | Breakfast">Breakfast</button>' in page
+    assert 'data-rate="Standard Rate | All Inclusive">All Inclusive</button>' in page
+    # table: Studio 260 / 320 (+60) / 370 (+110)
+    assert "<td>€260</td><td>€320 <small>(+60)</small></td><td>€370 <small>(+110)</small></td>" in page
+    assert "<th>Half Board Plus<br><small>vs Breakfast</small></th>" in page
+
+
+def test_history_table_shows_change_since_first():
+    from watch import history as history_mod
+
+    h = []
+    history_mod.append_if_changed(h, GRID, NOW)
+    old = {"t": "2026-09-01T00:00:00+00:00", "rooms": {"STD": {"name": "Studio",
+           "rates": {"Standard Rate | Breakfast": {"2027-08-20": 250}}}}}
+    page = render_page(GRID, {}, NOW, 0, history=[old] + h)
+    assert "<td>€260 <small>(+10 since first)</small></td>" in page

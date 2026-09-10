@@ -23,7 +23,8 @@ class RoomRow:
     code: str
     name: str
     status: str  # "AVL" or "NA" from the first rate row
-    nights: dict[date, int | None] = field(default_factory=dict)
+    nights: dict[date, int | None] = field(default_factory=dict)  # first (cheapest) rate
+    rates: dict[str, dict[date, int | None]] = field(default_factory=dict)  # per package
 
 
 @dataclass
@@ -39,6 +40,7 @@ _RATE_ROW = re.compile(r'<tr\s+data-status="([^"]*)"(.*?)</tr>', re.S)
 _ROOM_CODE = re.compile(r'data-room="([^"]+)"')
 _CELL = re.compile(r'<td class="(noavl|range|)"[^>]*>(.*?)</td>', re.S)
 _PRICE = re.compile(r"(?:&euro;|€)\s*([\d.,]+)")
+_RATE_TITLE = re.compile(r'title="[^"]*? - ([^"]+)"')
 
 
 def _price(cell_html: str) -> int | None:
@@ -46,6 +48,20 @@ def _price(cell_html: str) -> int | None:
     if not m:
         return None
     return int(round(float(m.group(1).replace(",", ""))))
+
+
+def _row_nights(row_html: str, night_dates: list[date]) -> dict[date, int | None]:
+    # Cells: the row starts with the rate description <td scope="row" ...>,
+    # which does not match _CELL (class is "spec status"). Remaining cells
+    # are nights followed by the check-out column.
+    cells = _CELL.findall(row_html)
+    night_cells = cells[: len(night_dates)]
+    nights: dict[date, int | None] = {}
+    for d, (cls, inner) in zip(night_dates, night_cells):
+        nights[d] = None if cls == "noavl" else _price(inner)
+    for d in night_dates[len(night_cells):]:
+        nights[d] = None
+    return nights
 
 
 def parse_grid(html: str) -> Grid:
@@ -57,8 +73,8 @@ def parse_grid(html: str) -> Grid:
     dates: list[date] = []
     for block in blocks:
         name_m = _NAME.search(block)
-        rate_m = _RATE_ROW.search(block)
-        if not name_m or not rate_m:
+        rate_rows = _RATE_ROW.findall(block)
+        if not name_m or not rate_rows:
             continue
         block_dates = [date.fromisoformat(d) for d in _DATE.findall(block)]
         if not block_dates:
@@ -68,25 +84,25 @@ def parse_grid(html: str) -> Grid:
         if not dates:
             dates = night_dates
 
-        status = rate_m.group(1)
-        row_html = rate_m.group(2)
-        code_m = _ROOM_CODE.search(row_html)
+        status, first_row = rate_rows[0]
+        code_m = _ROOM_CODE.search(first_row)
         if not code_m:
             continue
         code = code_m.group(1)
-        # Cells: the row starts with the rate description <td scope="row" ...>,
-        # which does not match _CELL (class is "spec status"). Remaining cells
-        # are nights followed by the check-out column.
-        cells = _CELL.findall(row_html)
-        night_cells = cells[: len(night_dates)]
-        nights: dict[date, int | None] = {}
-        for d, (cls, inner) in zip(night_dates, night_cells):
-            nights[d] = None if cls == "noavl" else _price(inner)
-        for d in night_dates[len(night_cells):]:
-            nights[d] = None
+        rates: dict[str, dict[date, int | None]] = {}
+        for i, (_status, row_html) in enumerate(rate_rows):
+            title_m = _RATE_TITLE.search(row_html)
+            rate_name = htmllib.unescape(title_m.group(1)).strip() if title_m else f"Rate {i + 1}"
+            rates[rate_name] = _row_nights(row_html, night_dates)
 
         name = htmllib.unescape(re.sub(r"<[^>]+>", "", name_m.group(1))).strip()
-        rooms[code] = RoomRow(code=code, name=name, status=status, nights=nights)
+        rooms[code] = RoomRow(
+            code=code,
+            name=name,
+            status=status,
+            nights=next(iter(rates.values())),
+            rates=rates,
+        )
 
     if not rooms:
         raise ParseError("no parseable room rows")

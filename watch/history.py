@@ -29,17 +29,27 @@ def save(path: str | Path, history: list[dict]) -> None:
     p.write_text(json.dumps(history, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
+DEFAULT_RATE = "Standard Rate | Breakfast"
+
+
 def snapshot(grid: Grid, now: datetime) -> dict:
-    return {
-        "t": now.isoformat(),
-        "rooms": {
-            code: {
-                "name": row.name,
-                "nights": {d.isoformat(): p for d, p in row.nights.items()},
-            }
-            for code, row in grid.rooms.items()
-        },
-    }
+    rooms = {}
+    for code, row in grid.rooms.items():
+        rates = row.rates or {DEFAULT_RATE: row.nights}
+        rooms[code] = {
+            "name": row.name,
+            "nights": {d.isoformat(): p for d, p in row.nights.items()},
+            "rates": {
+                rate: {d.isoformat(): p for d, p in nights.items()}
+                for rate, nights in rates.items()
+            },
+        }
+    return {"t": now.isoformat(), "rooms": rooms}
+
+
+def _room_rates(room: dict) -> dict[str, dict]:
+    """Rates of a stored room; old snapshots (before packages) have only nights."""
+    return room.get("rates") or {DEFAULT_RATE: room.get("nights", {})}
 
 
 def append_if_changed(history: list[dict], grid: Grid, now: datetime) -> bool:
@@ -52,11 +62,29 @@ def append_if_changed(history: list[dict], grid: Grid, now: datetime) -> bool:
 
 
 def series(history: list[dict]) -> dict[str, dict]:
-    """Per room: name plus [timestamp, lowest open-night price or None] points."""
+    """Per room: name plus, per package, [timestamp, lowest open-night price] points.
+
+    ``points`` keeps the first package (cheapest board) for backwards compatibility.
+    """
     out: dict[str, dict] = {}
     for snap in history:
         for code, room in snap.get("rooms", {}).items():
-            prices = [p for p in room.get("nights", {}).values() if p is not None]
-            entry = out.setdefault(code, {"name": room.get("name", code), "points": []})
-            entry["points"].append([snap["t"], min(prices) if prices else None])
+            entry = out.setdefault(code, {"name": room.get("name", code), "points": [], "rates": {}})
+            for i, (rate, nights) in enumerate(_room_rates(room).items()):
+                prices = [p for p in nights.values() if p is not None]
+                point = [snap["t"], min(prices) if prices else None]
+                entry["rates"].setdefault(rate, []).append(point)
+                if i == 0:
+                    entry["points"].append(point)
     return out
+
+
+def rate_names(history: list[dict]) -> list[str]:
+    """All package names seen, in first-seen order."""
+    names: list[str] = []
+    for snap in history:
+        for room in snap.get("rooms", {}).values():
+            for rate in _room_rates(room):
+                if rate not in names:
+                    names.append(rate)
+    return names

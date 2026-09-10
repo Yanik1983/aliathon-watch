@@ -79,3 +79,44 @@ def test_series_from_real_fixture():
     s = history.series(h)
     assert s["1BED"]["points"] == [[NOW.isoformat(), 280]]
     assert s["STD"]["points"] == [[NOW.isoformat(), 260]]
+
+
+def test_snapshot_stores_every_package():
+    h = []
+    history.append_if_changed(h, parse_grid(HTML), NOW)
+    rates = h[0]["rooms"]["1BED"]["rates"]
+    assert list(rates) == [
+        "Standard Rate | Breakfast",
+        "Standard Rate | Half Board Plus",
+        "Standard Rate | All Inclusive",
+    ]
+    assert rates["Standard Rate | All Inclusive"]["2027-08-20"] == 390
+
+
+def test_series_per_package_and_rate_names():
+    h = []
+    history.append_if_changed(h, parse_grid(HTML), NOW)
+    s = history.series(h)
+    assert s["1BED"]["rates"]["Standard Rate | Half Board Plus"] == [[NOW.isoformat(), 340]]
+    assert s["1BED"]["points"] == [[NOW.isoformat(), 280]]
+    assert history.rate_names(h) == [
+        "Standard Rate | Breakfast",
+        "Standard Rate | Half Board Plus",
+        "Standard Rate | All Inclusive",
+    ]
+
+
+def test_old_snapshot_without_rates_still_works():
+    old = [{"t": NOW.isoformat(), "rooms": {"1BED": {"name": "One Bedroom Apartment",
+            "nights": {"2027-08-20": 280, "2027-08-21": None}}}}]
+    s = history.series(old)
+    assert s["1BED"]["rates"] == {history.DEFAULT_RATE: [[NOW.isoformat(), 280]]}
+    assert history.rate_names(old) == [history.DEFAULT_RATE]
+
+
+def test_package_price_change_appended():
+    h = []
+    g = parse_grid(HTML)
+    history.append_if_changed(h, g, NOW)
+    g.rooms["1BED"].rates["Standard Rate | All Inclusive"][date(2027, 8, 20)] = 400
+    assert history.append_if_changed(h, g, NOW + timedelta(hours=1)) is True
