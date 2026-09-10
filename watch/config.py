@@ -30,6 +30,7 @@ FAIL_ALERT_AT = 3
 NTFY_SERVER = os.environ.get("NTFY_SERVER", "https://ntfy.sh").rstrip("/")
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 NTFY_EMAIL = os.environ.get("NTFY_EMAIL", "")
+NTFY_TOKEN = os.environ.get("NTFY_TOKEN", "")  # ntfy.sh account token; required for Email
 
 # Output paths (relative to repo root)
 STATE_PATH = "state.json"

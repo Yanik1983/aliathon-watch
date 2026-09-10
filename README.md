@@ -30,6 +30,10 @@ If three polls fail in a row, one warning notification is sent.
 2. Repository secrets (Settings > Secrets and variables > Actions):
    - `NTFY_TOPIC` — the topic name
    - `NTFY_EMAIL` — address for the email copy (optional)
+   - `NTFY_TOKEN` — ntfy.sh access token. ntfy.sh only relays email for
+     signed-in users, so the email copy needs a free ntfy.sh account: sign up
+     at https://ntfy.sh/signup, then Account > Access tokens > Create. Without
+     the token the push still goes out; the email copy is skipped.
    - optional repository variable `NTFY_SERVER` for a self-hosted ntfy
 3. GitHub Pages: Settings > Pages > Source: Deploy from a branch, branch
    `main`, folder `/docs`.

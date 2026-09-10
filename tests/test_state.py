@@ -74,6 +74,46 @@ def test_send_without_email_omits_header(monkeypatch):
     assert "Click" not in calls[0]
 
 
+def test_send_with_token_adds_bearer(monkeypatch):
+    monkeypatch.setattr(notify.config, "NTFY_TOPIC", "t")
+    monkeypatch.setattr(notify.config, "NTFY_EMAIL", "")
+    monkeypatch.setattr(notify.config, "NTFY_TOKEN", "tk_abc")
+    calls = []
+
+    def fake_post(url, data=None, headers=None, timeout=None):
+        calls.append(headers)
+
+        class R:
+            status_code = 200
+            text = "ok"
+
+        return R()
+
+    notify.send("t", "b", post=fake_post)
+    assert calls[0]["Authorization"] == "Bearer tk_abc"
+
+
+def test_send_retries_without_email_when_rejected(monkeypatch):
+    monkeypatch.setattr(notify.config, "NTFY_TOPIC", "t")
+    monkeypatch.setattr(notify.config, "NTFY_EMAIL", "me@example.com")
+    monkeypatch.setattr(notify.config, "NTFY_TOKEN", "")
+    calls = []
+
+    def fake_post(url, data=None, headers=None, timeout=None):
+        calls.append(dict(headers))
+
+        class R:
+            status_code = 400 if "Email" in headers else 200
+            text = "anonymous email sending is not allowed"
+
+        return R()
+
+    assert notify.send("t", "b", post=fake_post) is True
+    assert len(calls) == 2
+    assert "Email" in calls[0] and "Email" not in calls[1]
+    assert calls[1]["Title"] == "t"
+
+
 def test_send_without_topic_is_noop(monkeypatch):
     monkeypatch.setattr(notify.config, "NTFY_TOPIC", "")
     called = []
