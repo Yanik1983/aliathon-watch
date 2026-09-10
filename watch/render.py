@@ -154,7 +154,7 @@ def render_page(
 {fail_html}
 {_windows_section(confirmed)}
 {_grid_section(grid)}
-<footer>Source: aliathonaegean.reserve-online.net availability for 1 room, 2 adults. Prices in EUR per night, lowest rate shown.</footer>
+<footer>Source: aliathonaegean.reserve-online.net availability for 1 room, 2 adults, 2 children. Prices in EUR per night, lowest rate shown.</footer>
 </main>
 </body>
 </html>

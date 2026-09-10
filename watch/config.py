@@ -20,7 +20,7 @@ LAST_CHECKOUT = date(2027, 8, 29)
 TOTAL_NIGHTS = (LAST_CHECKOUT - FIRST_CHECKIN).days  # 15
 ROOMS = 1
 ADULTS = 2
-CHILDREN = 0
+CHILDREN = 2
 INFANTS = 0
 
 # Failure alert threshold (consecutive failed polls)

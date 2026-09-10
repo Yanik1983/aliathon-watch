@@ -7,7 +7,7 @@ stays.
 
 **Watching for:** One Bedroom Apartment or Superior One Bedroom Apartment,
 5 to 8 nights, check-in on or after 14 Aug 2027, check-out on or before
-29 Aug 2027, 1 room, 2 adults.
+29 Aug 2027, 1 room, 2 adults, 2 children.
 
 ## How it works
 
