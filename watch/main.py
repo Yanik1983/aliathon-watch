@@ -7,7 +7,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from watch import config, notify, state as state_mod
+from watch import config, history as history_mod, notify, state as state_mod
 from watch.client import FetchError, fetch_avl
 from watch.confirm import ConfirmedWindow, confirm
 from watch.finder import find_windows
@@ -72,10 +72,12 @@ def _describe(e: dict) -> str:
     )
 
 
-def _finish(st: dict, grid: Grid | None, state_path, page_path, now: datetime) -> dict:
+def _finish(
+    st: dict, grid: Grid | None, state_path, page_path, now: datetime, history: list[dict]
+) -> dict:
     st["last_checked"] = now.isoformat()
     state_mod.save(state_path, st)
-    page = render_page(grid, st["confirmed"], now, st["fail_count"])
+    page = render_page(grid, st["confirmed"], now, st["fail_count"], history)
     p = Path(page_path)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(page, encoding="utf-8")
@@ -88,9 +90,12 @@ def run(
     state_path: str | Path = config.STATE_PATH,
     page_path: str | Path = config.PAGE_PATH,
     now: datetime | None = None,
+    history_path: str | Path | None = None,
 ) -> dict:
     now = now or datetime.now(timezone.utc)
+    history_path = history_path or config.HISTORY_PATH
     st = state_mod.load(state_path)
+    history = history_mod.load(history_path)
 
     try:
         grid = parse_grid(fetch(config.FIRST_CHECKIN, config.TOTAL_NIGHTS))
@@ -104,11 +109,14 @@ def run(
                 priority="default",
                 tags="warning",
             )
-        return _finish(st, grid_from_json(st.get("grid")), state_path, page_path, now)
+        return _finish(st, grid_from_json(st.get("grid")), state_path, page_path, now, history)
 
     st["fail_count"] = 0
     st["last_success"] = now.isoformat()
     st["grid"] = grid_to_json(grid)
+    if history_mod.append_if_changed(history, grid, now):
+        history_mod.save(history_path, history)
+        log.info("price history: change recorded (%d snapshots)", len(history))
 
     candidates = find_windows(
         grid,
@@ -144,7 +152,7 @@ def run(
         log.info("%d window(s) no longer available: %s", len(gone), ", ".join(gone))
 
     st["confirmed"] = confirmed_now
-    return _finish(st, grid, state_path, page_path, now)
+    return _finish(st, grid, state_path, page_path, now, history)
 
 
 def main() -> int:

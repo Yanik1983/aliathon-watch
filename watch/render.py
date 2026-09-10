@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import html as htmllib
+import json
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from watch import config
+from watch import history as history_mod
 from watch.parser import Grid
 
 CYPRUS = ZoneInfo("Europe/Nicosia")
@@ -124,11 +126,95 @@ def _grid_section(grid: Grid | None) -> str:
     )
 
 
+_CHART_JS = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
+_PALETTE = ["#0b5ed7", "#d63384", "#198754", "#fd7e14", "#6f42c1", "#20c997", "#dc3545", "#6c757d"]
+
+
+def _history_section(history: list[dict]) -> str:
+    series = history_mod.series(history)
+    if not series:
+        return (
+            '<section class="card" id="history"><h2>Price history</h2>'
+            "<p>No history yet. A point is recorded every time a price or availability changes.</p></section>"
+        )
+    ordered = [c for c in config.TARGET_ROOMS if c in series] + [
+        c for c in series if c not in config.TARGET_ROOMS
+    ]
+    datasets = []
+    for i, code in enumerate(ordered):
+        pts = [{"x": t, "y": price} for t, price in series[code]["points"]]
+        datasets.append(
+            {
+                "label": series[code]["name"],
+                "data": pts,
+                "borderColor": _PALETTE[i % len(_PALETTE)],
+                "backgroundColor": _PALETTE[i % len(_PALETTE)],
+                "borderWidth": 3 if code in config.TARGET_ROOMS else 1.5,
+                "pointRadius": 3,
+                "stepped": True,
+                "spanGaps": False,
+            }
+        )
+    rows = []
+    for code in ordered:
+        pts = series[code]["points"]
+        first = next((p for _, p in pts if p is not None), None)
+        now = pts[-1][1]
+        if first is None or now is None:
+            delta = "n/a" if now is None else "new"
+        else:
+            diff = now - first
+            delta = f"{'+' if diff > 0 else ''}{diff}"
+        first_s = f"€{first}" if first is not None else "—"
+        now_s = f"€{now}" if now is not None else "sold out"
+        rows.append(
+            f'<tr><td class="room">{htmllib.escape(series[code]["name"])}</td>'
+            f"<td>{first_s}</td><td>{now_s}</td><td>{delta}</td></tr>"
+        )
+    first_t = history[0]["t"][:10]
+    payload = json.dumps(datasets).replace("</", "<\\/")
+    return f"""<section class="card" id="history"><h2>Price history</h2>
+<p class="sub">Lowest open-night price per room type, EUR per night, since {first_t}. {len(history)} change(s) recorded; a point is added only when a price or availability changes.</p>
+<div style="position:relative;height:340px"><canvas id="priceChart"></canvas></div>
+<div class="wrap"><table><thead><tr><th class="room">Room</th><th>First seen</th><th>Now</th><th>Change</th></tr></thead>
+<tbody>{"".join(rows)}</tbody></table></div>
+<script src="{_CHART_JS}"></script>
+<script>
+(function(){{
+  var datasets = {payload};
+  datasets.forEach(function(d){{ d.data = d.data.map(function(p){{ return {{x: Date.parse(p.x), y: p.y}}; }}); }});
+  var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var fg = dark ? '#ddd' : '#333', grid = dark ? '#333' : '#e5e5e5';
+  function fmt(ms){{ return new Date(ms).toISOString().slice(0,10); }}
+  if (!window.Chart) {{ document.getElementById('priceChart').outerHTML = '<p>Chart library failed to load.</p>'; return; }}
+  new Chart(document.getElementById('priceChart'), {{
+    type: 'line',
+    data: {{datasets: datasets}},
+    options: {{
+      responsive: true, maintainAspectRatio: false, parsing: false,
+      interaction: {{mode: 'nearest', intersect: false}},
+      scales: {{
+        x: {{type: 'linear', ticks: {{color: fg, maxTicksLimit: 8, callback: fmt}}, grid: {{color: grid}}}},
+        y: {{ticks: {{color: fg, callback: function(v){{ return '€' + v; }}}}, grid: {{color: grid}}, title: {{display: true, text: 'EUR / night', color: fg}}}}
+      }},
+      plugins: {{
+        legend: {{labels: {{color: fg}}}},
+        tooltip: {{callbacks: {{title: function(items){{ return new Date(items[0].parsed.x).toUTCString().slice(0,22); }},
+                               label: function(c){{ return c.dataset.label + ': €' + c.parsed.y; }}}}}}
+      }}
+    }}
+  }});
+}})();
+</script>
+</section>"""
+
+
 def render_page(
     grid: Grid | None,
     confirmed: dict,
     checked_at: datetime | None,
     fail_count: int,
+    history: list[dict] | None = None,
 ) -> str:
     utc, cy = _fmt_dt(checked_at)
     fail_html = ""
@@ -150,10 +236,11 @@ def render_page(
 <main>
 <h1>Aliathon Aegean — August 2027 availability</h1>
 <p class="sub">Last checked {utc} ({cy}). Polls every 10 minutes.
-<a href="{config.BASE_URL}/" target="_blank" rel="noopener">Booking site</a></p>
+<a href="{config.BASE_URL}/" target="_blank" rel="noopener">Booking site</a> · <a href="#history">Price history</a></p>
 {fail_html}
 {_windows_section(confirmed)}
 {_grid_section(grid)}
+{_history_section(history or [])}
 <footer>Source: aliathonaegean.reserve-online.net availability for 1 room, 2 adults, 2 children. Prices in EUR per night, lowest rate shown.</footer>
 </main>
 </body>

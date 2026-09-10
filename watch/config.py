@@ -35,3 +35,4 @@ NTFY_TOKEN = os.environ.get("NTFY_TOKEN", "")  # ntfy.sh account token; required
 # Output paths (relative to repo root)
 STATE_PATH = "state.json"
 PAGE_PATH = "docs/index.html"
+HISTORY_PATH = "history.json"

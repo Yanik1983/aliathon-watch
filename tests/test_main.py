@@ -3,6 +3,9 @@ import json
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
+
+from watch import config
 from watch.client import FetchError
 from watch.main import run
 
@@ -76,6 +79,12 @@ def days(a, b):
 
 def paths(tmp_path):
     return tmp_path / "state.json", tmp_path / "docs" / "index.html"
+
+
+@pytest.fixture(autouse=True)
+def _isolate_history(tmp_path, monkeypatch):
+    """Never let tests touch the repo's real history.json."""
+    monkeypatch.setattr(config, "HISTORY_PATH", str(tmp_path / "history.json"))
 
 
 def test_fixture_run_no_notification_and_outputs_written(tmp_path):
@@ -183,3 +192,29 @@ def test_empty_grid_counts_as_failure(tmp_path):
     n = FakeNotifier()
     st = run(fetch=lambda f, k: "<table></table>", notifier=n, state_path=sp, page_path=pp, now=NOW)
     assert st["fail_count"] == 1
+
+
+def test_history_recorded_on_change_only(tmp_path):
+    sp, pp = paths(tmp_path)
+    hp = tmp_path / "history.json"
+    n = FakeNotifier()
+    run(fetch=FakeFetch(), notifier=n, state_path=sp, page_path=pp, now=NOW, history_path=hp)
+    h1 = json.loads(hp.read_text(encoding="utf-8"))
+    assert len(h1) == 1 and h1[0]["t"] == NOW.isoformat()
+    assert h1[0]["rooms"]["1BED"]["nights"]["2027-08-20"] == 280
+    run(fetch=FakeFetch(), notifier=n, state_path=sp, page_path=pp, now=NOW + timedelta(hours=1), history_path=hp)
+    assert len(json.loads(hp.read_text(encoding="utf-8"))) == 1
+    run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=n, state_path=sp, page_path=pp,
+        now=NOW + timedelta(hours=2), history_path=hp)
+    assert len(json.loads(hp.read_text(encoding="utf-8"))) == 2
+    assert "priceChart" in pp.read_text(encoding="utf-8")
+
+
+def test_history_kept_on_failure(tmp_path):
+    sp, pp = paths(tmp_path)
+    hp = tmp_path / "history.json"
+    n = FakeNotifier()
+    run(fetch=FakeFetch(), notifier=n, state_path=sp, page_path=pp, now=NOW, history_path=hp)
+    run(fetch=FakeFetch(fail=True), notifier=n, state_path=sp, page_path=pp, now=NOW, history_path=hp)
+    assert len(json.loads(hp.read_text(encoding="utf-8"))) == 1
+    assert "priceChart" in pp.read_text(encoding="utf-8")

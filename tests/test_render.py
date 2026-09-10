@@ -73,3 +73,25 @@ def test_times_shown():
     page = render_page(GRID, {}, NOW, 0)
     assert "2026-09-10 20:00 UTC" in page
     assert "23:00" in page  # Cyprus is UTC+3 in September
+
+
+def test_no_history_section_placeholder():
+    page = render_page(GRID, {}, NOW, 0, history=[])
+    assert "Price history" in page
+    assert "No history yet" in page
+    assert "priceChart" not in page
+
+
+def test_history_chart_embedded():
+    from watch import history as history_mod
+
+    h = []
+    history_mod.append_if_changed(h, GRID, NOW)
+    page = render_page(GRID, {}, NOW, 0, history=h)
+    assert '<canvas id="priceChart">' in page
+    assert "cdnjs.cloudflare.com/ajax/libs/Chart.js" in page
+    assert '"label": "One Bedroom Apartment"' in page
+    assert '"y": 280' in page
+    assert "1 change(s) recorded" in page
+    # summary table row for Studio: first 260, now 260, change 0
+    assert "<td>€260</td><td>€260</td><td>0</td>" in page
