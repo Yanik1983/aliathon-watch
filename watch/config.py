@@ -27,7 +27,8 @@ INFANTS = 0
 FAIL_ALERT_AT = 3
 
 # Notification (ntfy)
-NTFY_SERVER = os.environ.get("NTFY_SERVER", "https://ntfy.sh").rstrip("/")
+# "or": GitHub Actions passes an undefined repo variable as an empty string.
+NTFY_SERVER = (os.environ.get("NTFY_SERVER") or "https://ntfy.sh").rstrip("/")
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 NTFY_EMAIL = os.environ.get("NTFY_EMAIL", "")
 NTFY_TOKEN = os.environ.get("NTFY_TOKEN", "")  # ntfy.sh account token; required for Email
