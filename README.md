@@ -18,8 +18,13 @@ stays.
    only rows the hotel marks `AVL` count (this catches minimum-stay rules).
 4. New confirmed stays that were not present in the previous poll trigger one
    ntfy notification (push to phone, email copy if configured).
-5. `state.json` and `docs/index.html` are committed back; GitHub Pages serves
-   the page from `docs/`.
+5. `state.json`, `history.json` and `docs/index.html` are committed back;
+   GitHub Pages serves the page from `docs/`.
+
+The GitHub Actions job is one long loop (poll, commit, sleep 10 minutes) that
+runs for about 5 h 50 m. A fresh job starts every 3 hours and on every code
+push, cancelling the previous one, so polling stays at a true 10-minute cadence
+even when GitHub delays scheduled runs.
 
 If three polls fail in a row, one warning notification is sent.
 
