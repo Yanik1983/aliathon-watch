@@ -7,7 +7,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from watch import config, history as history_mod, notify, state as state_mod
+from watch import config, history as history_mod, notify, pagecrypt, state as state_mod
 from watch.client import FetchError, fetch_avl
 from watch.confirm import ConfirmedWindow, confirm
 from watch.finder import find_windows
@@ -77,7 +77,12 @@ def _finish(
 ) -> dict:
     st["last_checked"] = now.isoformat()
     state_mod.save(state_path, st)
-    page = render_page(grid, st["confirmed"], now, st["fail_count"], history)
+    test_push = (
+        pagecrypt.encrypt(config.NTFY_TOPIC, config.PAGE_PASSWORD)
+        if config.NTFY_TOPIC and config.PAGE_PASSWORD
+        else None
+    )
+    page = render_page(grid, st["confirmed"], now, st["fail_count"], history, test_push=test_push)
     p = Path(page_path)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(page, encoding="utf-8")

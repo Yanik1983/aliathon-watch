@@ -31,6 +31,9 @@ NTFY_SERVER = os.environ.get("NTFY_SERVER", "https://ntfy.sh").rstrip("/")
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 NTFY_EMAIL = os.environ.get("NTFY_EMAIL", "")
 NTFY_TOKEN = os.environ.get("NTFY_TOKEN", "")  # ntfy.sh account token; required for Email
+# Password for the "send test push" card on the status page. The topic is embedded
+# encrypted with it; without a password the card is not rendered.
+PAGE_PASSWORD = os.environ.get("PAGE_PASSWORD", "")
 
 # Output paths (relative to repo root)
 STATE_PATH = "state.json"

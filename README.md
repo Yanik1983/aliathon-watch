@@ -39,6 +39,12 @@ If three polls fail in a row, one warning notification is sent.
      signed-in users, so the email copy needs a free ntfy.sh account: sign up
      at https://ntfy.sh/signup, then Account > Access tokens > Create. Without
      the token the push still goes out; the email copy is skipped.
+   - `PAGE_PASSWORD` — optional. Enables a "Test notification" card on the
+     status page: enter this password and the page sends a test push through
+     the same topic. The topic is embedded in the page encrypted with the
+     password (PBKDF2 + AES-GCM, decrypted in the browser only), so it is
+     never visible in the repo or the page source. Use a long passphrase:
+     the encrypted blob is public and can be brute-forced offline.
    - optional repository variable `NTFY_SERVER` for a self-hosted ntfy
 3. GitHub Pages: Settings > Pages > Source: Deploy from a branch, branch
    `main`, folder `/docs`.

@@ -218,3 +218,21 @@ def test_history_kept_on_failure(tmp_path):
     run(fetch=FakeFetch(fail=True), notifier=n, state_path=sp, page_path=pp, now=NOW, history_path=hp)
     assert len(json.loads(hp.read_text(encoding="utf-8"))) == 1
     assert "priceChart" in pp.read_text(encoding="utf-8")
+
+
+def test_test_push_card_rendered_when_password_configured(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "NTFY_TOPIC", "my-secret-topic")
+    monkeypatch.setattr(config, "PAGE_PASSWORD", "pw")
+    sp, pp = paths(tmp_path)
+    run(fetch=FakeFetch(), notifier=FakeNotifier(), state_path=sp, page_path=pp, now=NOW)
+    page = pp.read_text(encoding="utf-8")
+    assert 'id="testpush"' in page
+    assert "my-secret-topic" not in page
+
+
+def test_test_push_card_absent_without_password(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "NTFY_TOPIC", "my-secret-topic")
+    monkeypatch.setattr(config, "PAGE_PASSWORD", "")
+    sp, pp = paths(tmp_path)
+    run(fetch=FakeFetch(), notifier=FakeNotifier(), state_path=sp, page_path=pp, now=NOW)
+    assert 'id="testpush"' not in pp.read_text(encoding="utf-8")

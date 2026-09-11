@@ -47,6 +47,15 @@ footer { color:var(--muted); font-size:12px; margin-top:16px; }
             background:var(--card); color:var(--fg); cursor:pointer; font:inherit; }
 .rate-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 h3 { font-size:1rem; margin:16px 0 6px; }
+#testpush form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+#testpush input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
+                  color:var(--fg); font:inherit; min-width:180px; }
+#testpush button { padding:6px 12px; border:0; border-radius:6px; background:var(--accent); color:#fff;
+                   font:inherit; font-weight:600; cursor:pointer; }
+#testpush button:disabled { opacity:.6; cursor:wait; }
+#testpush .msg { margin:8px 0 0; }
+#testpush .msg.err { color:#d9534f; }
+#testpush .msg.ok { color:#2e9e4f; }
 """
 
 
@@ -257,12 +266,73 @@ def _history_section(history: list[dict]) -> str:
 </section>"""
 
 
+def _test_push_section(blob: dict | None) -> str:
+    if not blob:
+        return ""
+    payload = json.dumps(blob).replace("</", "<\/")
+    server = htmllib.escape(config.NTFY_SERVER)
+    return f"""<section class="card" id="testpush"><h2>Test notification</h2>
+<p class="sub">Sends a test push to the phone through the same ntfy topic the watcher uses. The topic is stored
+here encrypted; the password decrypts it in your browser only.</p>
+<form autocomplete="off">
+<input type="password" id="tp-pw" placeholder="Password" autocomplete="current-password">
+<label><input type="checkbox" id="tp-remember"> remember on this device</label>
+<button type="submit" id="tp-send">Send test push</button>
+</form>
+<p class="msg" id="tp-msg"></p>
+<script>
+(function(){{
+  var blob = {payload}, server = "{server}";
+  var form = document.querySelector('#testpush form'), pw = document.getElementById('tp-pw'),
+      remember = document.getElementById('tp-remember'), btn = document.getElementById('tp-send'),
+      msg = document.getElementById('tp-msg'), KEY = 'aliathon-ntfy-topic';
+  function say(text, cls){{ msg.textContent = text; msg.className = 'msg ' + (cls || ''); }}
+  function b64(s){{ var bin = atob(s), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }}
+  function saved(){{ try {{ return localStorage.getItem(KEY) || ''; }} catch (e) {{ return ''; }} }}
+  function decryptTopic(password){{
+    var enc = new TextEncoder();
+    return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
+      .then(function(base){{ return crypto.subtle.deriveKey(
+        {{name: 'PBKDF2', salt: b64(blob.salt), iterations: blob.iter, hash: 'SHA-256'}},
+        base, {{name: 'AES-GCM', length: 256}}, false, ['decrypt']); }})
+      .then(function(key){{ return crypto.subtle.decrypt({{name: 'AES-GCM', iv: b64(blob.iv)}}, key, b64(blob.ct)); }})
+      .then(function(buf){{ return new TextDecoder().decode(buf); }});
+  }}
+  function sendTest(topic){{
+    var now = new Date();
+    return fetch(server + '/' + topic, {{method: 'POST',
+      headers: {{'Title': 'Aliathon test push', 'Priority': 'high', 'Tags': 'hotel,bell'}},
+      body: 'Test from status page at ' + now.toISOString().slice(0, 16).replace('T', ' ') + ' UTC'}});
+  }}
+  if (saved()) {{ pw.placeholder = 'Password (remembered)'; remember.checked = true; }}
+  if (!(window.crypto && crypto.subtle)) {{ say('This browser cannot decrypt here (needs https).', 'err'); btn.disabled = true; }}
+  form.addEventListener('submit', function(ev){{
+    ev.preventDefault();
+    btn.disabled = true; say('Working…');
+    var topicP = (!pw.value && saved()) ? Promise.resolve(saved()) : decryptTopic(pw.value);
+    topicP.then(function(topic){{
+      try {{ if (remember.checked) localStorage.setItem(KEY, topic); else localStorage.removeItem(KEY); }} catch (e) {{}}
+      return sendTest(topic);
+    }}).then(function(resp){{
+      if (resp.ok) say('Sent. Check the phone.', 'ok'); else say('ntfy returned ' + resp.status, 'err');
+    }}).catch(function(e){{
+      var wrong = e && (e.name === 'OperationError' || /decrypt/i.test(String(e)));
+      say(wrong ? 'Wrong password.' : 'Failed: ' + (e && e.message || e), 'err');
+      if (wrong) {{ try {{ localStorage.removeItem(KEY); }} catch (x) {{}} }}
+    }}).then(function(){{ btn.disabled = false; pw.value = ''; }});
+  }});
+}})();
+</script>
+</section>"""
+
+
 def render_page(
     grid: Grid | None,
     confirmed: dict,
     checked_at: datetime | None,
     fail_count: int,
     history: list[dict] | None = None,
+    test_push: dict | None = None,
 ) -> str:
     utc, cy = _fmt_dt(checked_at)
     epoch = int(checked_at.timestamp() * 1000) if checked_at else 0
@@ -290,6 +360,7 @@ def render_page(
 {_windows_section(confirmed)}
 {_grid_section(grid)}
 {_history_section(history or [])}
+{_test_push_section(test_push)}
 <script>
 (function(){{
   var el = document.getElementById('ago'); var t = el && Number(el.getAttribute('data-checked'));

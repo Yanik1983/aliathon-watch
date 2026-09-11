@@ -115,3 +115,21 @@ def test_history_table_shows_change_since_first():
            "rates": {"Standard Rate | Breakfast": {"2027-08-20": 250}}}}}
     page = render_page(GRID, {}, NOW, 0, history=[old] + h)
     assert "<td>€260 <small>(+10 since first)</small></td>" in page
+
+
+def test_no_test_push_card_without_blob():
+    page = render_page(GRID, {}, NOW, 0)
+    assert 'id="testpush"' not in page
+
+
+def test_test_push_card_embeds_encrypted_blob_only():
+    from watch import pagecrypt
+
+    blob = pagecrypt.encrypt("my-secret-topic", "pw")
+    page = render_page(GRID, {}, NOW, 0, test_push=blob)
+    assert 'id="testpush"' in page
+    assert "Send test push" in page
+    assert 'type="password"' in page
+    assert blob["ct"] in page and blob["salt"] in page and blob["iv"] in page
+    assert "my-secret-topic" not in page
+    assert "https://ntfy.sh" in page
