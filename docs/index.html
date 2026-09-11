@@ -54,7 +54,7 @@ h3 { font-size:1rem; margin:16px 0 6px; }
 <body>
 <main>
 <h1>Aliathon Aegean — August 2027 availability</h1>
-<p class="sub">Last checked <strong>2026-09-12 00:29 Cyprus</strong> <span id="ago" data-checked="1789162180131"></span><br>(2026-09-11 21:29 UTC). Polls every 10 minutes.
+<p class="sub">Last checked <strong>2026-09-12 00:39 Cyprus</strong> <span id="ago" data-checked="1789162795514"></span><br>(2026-09-11 21:39 UTC). Polls every 10 minutes.
 <a href="https://aliathonaegean.reserve-online.net/" target="_blank" rel="noopener">Booking site</a> · <a href="#history">Price history</a></p>
 
 <section class="card none"><h2>No bookable stays right now</h2><p>Watching for 5–8 nights in a One Bedroom or Superior One Bedroom Apartment, check-in from Sat 14 Aug 2027, check-out by Sun 29 Aug 2027.</p></section>
@@ -103,7 +103,59 @@ h3 { font-size:1rem; margin:16px 0 6px; }
 })();
 </script>
 </section>
-
+<section class="card" id="testpush"><h2>Test notification</h2>
+<p class="sub">Sends a test push to the phone through the same ntfy topic the watcher uses. The topic is stored
+here encrypted; the password decrypts it in your browser only.</p>
+<form autocomplete="off">
+<input type="password" id="tp-pw" placeholder="Password" autocomplete="current-password">
+<label><input type="checkbox" id="tp-remember"> remember on this device</label>
+<button type="submit" id="tp-send">Send test push</button>
+</form>
+<p class="msg" id="tp-msg"></p>
+<script>
+(function(){
+  var blob = {"salt": "jS6lPXUlKhQ9+3HB4dbjNg==", "iv": "7hdjgS5NCIImmmrB", "ct": "nDy0W6wvBGR0uQ6wt85j09XeuyqYHiw/pbQCcR0ToI1QL6p7UZhyfus=", "iter": 600000}, server = "";
+  var form = document.querySelector('#testpush form'), pw = document.getElementById('tp-pw'),
+      remember = document.getElementById('tp-remember'), btn = document.getElementById('tp-send'),
+      msg = document.getElementById('tp-msg'), KEY = 'aliathon-ntfy-topic';
+  function say(text, cls){ msg.textContent = text; msg.className = 'msg ' + (cls || ''); }
+  function b64(s){ var bin = atob(s), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
+  function saved(){ try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
+  function decryptTopic(password){
+    var enc = new TextEncoder();
+    return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
+      .then(function(base){ return crypto.subtle.deriveKey(
+        {name: 'PBKDF2', salt: b64(blob.salt), iterations: blob.iter, hash: 'SHA-256'},
+        base, {name: 'AES-GCM', length: 256}, false, ['decrypt']); })
+      .then(function(key){ return crypto.subtle.decrypt({name: 'AES-GCM', iv: b64(blob.iv)}, key, b64(blob.ct)); })
+      .then(function(buf){ return new TextDecoder().decode(buf); });
+  }
+  function sendTest(topic){
+    var now = new Date();
+    return fetch(server + '/' + topic, {method: 'POST',
+      headers: {'Title': 'Aliathon test push', 'Priority': 'high', 'Tags': 'hotel,bell'},
+      body: 'Test from status page at ' + now.toISOString().slice(0, 16).replace('T', ' ') + ' UTC'});
+  }
+  if (saved()) { pw.placeholder = 'Password (remembered)'; remember.checked = true; }
+  if (!(window.crypto && crypto.subtle)) { say('This browser cannot decrypt here (needs https).', 'err'); btn.disabled = true; }
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    btn.disabled = true; say('Working…');
+    var topicP = (!pw.value && saved()) ? Promise.resolve(saved()) : decryptTopic(pw.value);
+    topicP.then(function(topic){
+      try { if (remember.checked) localStorage.setItem(KEY, topic); else localStorage.removeItem(KEY); } catch (e) {}
+      return sendTest(topic);
+    }).then(function(resp){
+      if (resp.ok) say('Sent. Check the phone.', 'ok'); else say('ntfy returned ' + resp.status, 'err');
+    }).catch(function(e){
+      var wrong = e && (e.name === 'OperationError' || /decrypt/i.test(String(e)));
+      say(wrong ? 'Wrong password.' : 'Failed: ' + (e && e.message || e), 'err');
+      if (wrong) { try { localStorage.removeItem(KEY); } catch (x) {} }
+    }).then(function(){ btn.disabled = false; pw.value = ''; });
+  });
+})();
+</script>
+</section>
 <script>
 (function(){
   var el = document.getElementById('ago'); var t = el && Number(el.getAttribute('data-checked'));
