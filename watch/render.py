@@ -265,6 +265,7 @@ def render_page(
     history: list[dict] | None = None,
 ) -> str:
     utc, cy = _fmt_dt(checked_at)
+    epoch = int(checked_at.timestamp() * 1000) if checked_at else 0
     fail_html = ""
     if fail_count >= 1:
         fail_html = (
@@ -283,12 +284,22 @@ def render_page(
 <body>
 <main>
 <h1>Aliathon Aegean — August 2027 availability</h1>
-<p class="sub">Last checked {utc} ({cy}). Polls every 10 minutes.
+<p class="sub">Last checked <strong>{cy}</strong> <span id="ago" data-checked="{epoch}"></span><br>({utc}). Polls every 10 minutes.
 <a href="{config.BASE_URL}/" target="_blank" rel="noopener">Booking site</a> · <a href="#history">Price history</a></p>
 {fail_html}
 {_windows_section(confirmed)}
 {_grid_section(grid)}
 {_history_section(history or [])}
+<script>
+(function(){
+  var el = document.getElementById('ago'); var t = el && Number(el.getAttribute('data-checked'));
+  if (!t) return;
+  function tick(){ var m = Math.round((Date.now() - t) / 60000);
+    el.textContent = m < 1 ? '(just now)' : m < 120 ? '(' + m + ' min ago)' : '(' + Math.round(m / 60) + ' h ago)';
+    el.style.color = m > 30 ? '#d9534f' : ''; }
+  tick(); setInterval(tick, 30000);
+})();
+</script>
 <footer>Source: aliathonaegean.reserve-online.net availability for 1 room, 2 adults, 2 children. Prices in EUR per night, lowest rate shown.</footer>
 </main>
 </body>

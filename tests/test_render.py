@@ -72,7 +72,8 @@ def test_failure_banner():
 def test_times_shown():
     page = render_page(GRID, {}, NOW, 0)
     assert "2026-09-10 20:00 UTC" in page
-    assert "23:00" in page  # Cyprus is UTC+3 in September
+    assert "<strong>2026-09-10 23:00 Cyprus</strong>" in page  # Cyprus is UTC+3 in September
+    assert 'data-checked="1789070400000"' in page
 
 
 def test_no_history_section_placeholder():
