@@ -291,14 +291,14 @@ def render_page(
 {_grid_section(grid)}
 {_history_section(history or [])}
 <script>
-(function(){
+(function(){{
   var el = document.getElementById('ago'); var t = el && Number(el.getAttribute('data-checked'));
   if (!t) return;
-  function tick(){ var m = Math.round((Date.now() - t) / 60000);
+  function tick(){{ var m = Math.round((Date.now() - t) / 60000);
     el.textContent = m < 1 ? '(just now)' : m < 120 ? '(' + m + ' min ago)' : '(' + Math.round(m / 60) + ' h ago)';
-    el.style.color = m > 30 ? '#d9534f' : ''; }
+    el.style.color = m > 30 ? '#d9534f' : ''; }}
   tick(); setInterval(tick, 30000);
-})();
+}})();
 </script>
 <footer>Source: aliathonaegean.reserve-online.net availability for 1 room, 2 adults, 2 children. Prices in EUR per night, lowest rate shown.</footer>
 </main>
