@@ -269,7 +269,7 @@ def _history_section(history: list[dict]) -> str:
 def _test_push_section(blob: dict | None) -> str:
     if not blob:
         return ""
-    payload = json.dumps(blob).replace("</", "<\/")
+    payload = json.dumps(blob).replace("</", "<\\/")
     server = htmllib.escape(config.NTFY_SERVER)
     return f"""<section class="card" id="testpush"><h2>Test notification</h2>
 <p class="sub">Sends a test push to the phone through the same ntfy topic the watcher uses. The topic is stored
