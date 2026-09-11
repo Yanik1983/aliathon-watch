@@ -40,12 +40,21 @@ footer { color:var(--muted); font-size:12px; margin-top:16px; }
             background:var(--card); color:var(--fg); cursor:pointer; font:inherit; }
 .rate-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 h3 { font-size:1rem; margin:16px 0 6px; }
+#testpush form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+#testpush input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
+                  color:var(--fg); font:inherit; min-width:180px; }
+#testpush button { padding:6px 12px; border:0; border-radius:6px; background:var(--accent); color:#fff;
+                   font:inherit; font-weight:600; cursor:pointer; }
+#testpush button:disabled { opacity:.6; cursor:wait; }
+#testpush .msg { margin:8px 0 0; }
+#testpush .msg.err { color:#d9534f; }
+#testpush .msg.ok { color:#2e9e4f; }
 </style>
 </head>
 <body>
 <main>
 <h1>Aliathon Aegean — August 2027 availability</h1>
-<p class="sub">Last checked <strong>2026-09-12 00:23 Cyprus</strong> <span id="ago" data-checked="1789161827703"></span><br>(2026-09-11 21:23 UTC). Polls every 10 minutes.
+<p class="sub">Last checked <strong>2026-09-12 00:29 Cyprus</strong> <span id="ago" data-checked="1789162180131"></span><br>(2026-09-11 21:29 UTC). Polls every 10 minutes.
 <a href="https://aliathonaegean.reserve-online.net/" target="_blank" rel="noopener">Booking site</a> · <a href="#history">Price history</a></p>
 
 <section class="card none"><h2>No bookable stays right now</h2><p>Watching for 5–8 nights in a One Bedroom or Superior One Bedroom Apartment, check-in from Sat 14 Aug 2027, check-out by Sun 29 Aug 2027.</p></section>
@@ -94,6 +103,7 @@ h3 { font-size:1rem; margin:16px 0 6px; }
 })();
 </script>
 </section>
+
 <script>
 (function(){
   var el = document.getElementById('ago'); var t = el && Number(el.getAttribute('data-checked'));
