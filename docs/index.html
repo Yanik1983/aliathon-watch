@@ -45,7 +45,7 @@ h3 { font-size:1rem; margin:16px 0 6px; }
 <body>
 <main>
 <h1>Aliathon Aegean — August 2027 availability</h1>
-<p class="sub">Last checked 2026-09-11 05:48 UTC (2026-09-11 08:48 Cyprus). Polls every 10 minutes.
+<p class="sub">Last checked <strong>2026-09-11 08:58 Cyprus</strong> <span id="ago" data-checked="1789106294797"></span><br>(2026-09-11 05:58 UTC). Polls every 10 minutes.
 <a href="https://aliathonaegean.reserve-online.net/" target="_blank" rel="noopener">Booking site</a> · <a href="#history">Price history</a></p>
 
 <section class="card none"><h2>No bookable stays right now</h2><p>Watching for 5–8 nights in a One Bedroom or Superior One Bedroom Apartment, check-in from Sat 14 Aug 2027, check-out by Sun 29 Aug 2027.</p></section>
@@ -94,6 +94,16 @@ h3 { font-size:1rem; margin:16px 0 6px; }
 })();
 </script>
 </section>
+<script>
+(function(){
+  var el = document.getElementById('ago'); var t = el && Number(el.getAttribute('data-checked'));
+  if (!t) return;
+  function tick(){ var m = Math.round((Date.now() - t) / 60000);
+    el.textContent = m < 1 ? '(just now)' : m < 120 ? '(' + m + ' min ago)' : '(' + Math.round(m / 60) + ' h ago)';
+    el.style.color = m > 30 ? '#d9534f' : ''; }
+  tick(); setInterval(tick, 30000);
+})();
+</script>
 <footer>Source: aliathonaegean.reserve-online.net availability for 1 room, 2 adults, 2 children. Prices in EUR per night, lowest rate shown.</footer>
 </main>
 </body>
