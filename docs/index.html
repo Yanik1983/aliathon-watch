@@ -40,6 +40,17 @@ footer { color:var(--muted); font-size:12px; margin-top:16px; }
             background:var(--card); color:var(--fg); cursor:pointer; font:inherit; }
 .rate-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 h3 { font-size:1rem; margin:16px 0 6px; }
+#chart-fs { float:right; }
+#chart-box { position:relative; }
+.chart-wrap { position:relative; height:340px; }
+#chart-box .fs-close { display:none; }
+#chart-box.fs { position:fixed; inset:0; z-index:100; background:var(--card); padding:12px 12px 8px;
+                display:flex; flex-direction:column; overflow:hidden; }
+#chart-box.fs .chart-wrap { flex:1; min-height:0; height:auto; }
+#chart-box.fs .fs-close { display:block; position:absolute; top:6px; right:10px; z-index:1; width:36px; height:36px;
+                          border:1px solid var(--line); border-radius:50%; background:var(--card); color:var(--fg);
+                          font:20px/1 system-ui,sans-serif; cursor:pointer; }
+#chart-box.fs .rate-btns { padding-right:44px; margin-top:0; }
 #testpush form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 #testpush input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
                   color:var(--fg); font:inherit; min-width:180px; }
@@ -54,15 +65,18 @@ h3 { font-size:1rem; margin:16px 0 6px; }
 <body>
 <main>
 <h1>Aliathon Aegean — August 2027 availability</h1>
-<p class="sub">Last checked <strong>2026-09-12 11:21 Cyprus</strong> <span id="ago" data-checked="1789201309177"></span><br>(2026-09-12 08:21 UTC). Polls every 10 minutes.
+<p class="sub">Last checked <strong>2026-09-12 11:23 Cyprus</strong> <span id="ago" data-checked="1789201435235"></span><br>(2026-09-12 08:23 UTC). Polls every 10 minutes.
 <a href="https://aliathonaegean.reserve-online.net/" target="_blank" rel="noopener">Booking site</a> · <a href="#history">Price history</a></p>
 
 <section class="card none"><h2>No bookable stays right now</h2><p>Watching for 5–8 nights in a One Bedroom or Superior One Bedroom Apartment, check-in from Sat 14 Aug 2027, check-out by Sun 29 Aug 2027.</p></section>
 <section class="card"><h2>Per-night availability, 14–28 Aug 2027</h2><p class="legend"><span class="open" style="background:var(--open);color:var(--open-fg)">€ open</span><span style="background:var(--sold);color:var(--sold-fg)">✕ sold out</span> Highlighted rooms are the ones being watched. A stay needs every night open <em>and</em> the hotel to accept those exact dates; the list above shows only confirmed stays.</p><div class="wrap"><table><thead><tr><th class="room">Room</th><th><span>Sat</span><br>Aug 14</th><th><span>Sun</span><br>Aug 15</th><th><span>Mon</span><br>Aug 16</th><th><span>Tue</span><br>Aug 17</th><th><span>Wed</span><br>Aug 18</th><th><span>Thu</span><br>Aug 19</th><th><span>Fri</span><br>Aug 20</th><th><span>Sat</span><br>Aug 21</th><th><span>Sun</span><br>Aug 22</th><th><span>Mon</span><br>Aug 23</th><th><span>Tue</span><br>Aug 24</th><th><span>Wed</span><br>Aug 25</th><th><span>Thu</span><br>Aug 26</th><th><span>Fri</span><br>Aug 27</th><th><span>Sat</span><br>Aug 28</th></tr></thead><tbody><tr class="target"><td class="room">One Bedroom Apartment</td><td class="sold" data-room="1BED" data-date="2027-08-14">✕</td><td class="sold" data-room="1BED" data-date="2027-08-15">✕</td><td class="sold" data-room="1BED" data-date="2027-08-16">✕</td><td class="sold" data-room="1BED" data-date="2027-08-17">✕</td><td class="sold" data-room="1BED" data-date="2027-08-18">✕</td><td class="sold" data-room="1BED" data-date="2027-08-19">✕</td><td class="open" data-room="1BED" data-date="2027-08-20">€295</td><td class="open" data-room="1BED" data-date="2027-08-21">€295</td><td class="sold" data-room="1BED" data-date="2027-08-22">✕</td><td class="sold" data-room="1BED" data-date="2027-08-23">✕</td><td class="sold" data-room="1BED" data-date="2027-08-24">✕</td><td class="sold" data-room="1BED" data-date="2027-08-25">✕</td><td class="sold" data-room="1BED" data-date="2027-08-26">✕</td><td class="sold" data-room="1BED" data-date="2027-08-27">✕</td><td class="open" data-room="1BED" data-date="2027-08-28">€295</td></tr><tr class="target"><td class="room">Superior One Bedroom Apartment</td><td class="open" data-room="S1BED" data-date="2027-08-14">€305</td><td class="sold" data-room="S1BED" data-date="2027-08-15">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-16">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-17">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-18">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-19">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-20">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-21">✕</td><td class="open" data-room="S1BED" data-date="2027-08-22">€305</td><td class="sold" data-room="S1BED" data-date="2027-08-23">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-24">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-25">✕</td><td class="sold" data-room="S1BED" data-date="2027-08-26">✕</td><td class="open" data-room="S1BED" data-date="2027-08-27">€305</td><td class="open" data-room="S1BED" data-date="2027-08-28">€305</td></tr><tr><td class="room">One Bedroom Suite</td><td class="sold" data-room="1BSU" data-date="2027-08-14">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-15">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-16">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-17">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-18">✕</td><td class="open" data-room="1BSU" data-date="2027-08-19">€340</td><td class="open" data-room="1BSU" data-date="2027-08-20">€340</td><td class="sold" data-room="1BSU" data-date="2027-08-21">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-22">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-23">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-24">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-25">✕</td><td class="sold" data-room="1BSU" data-date="2027-08-26">✕</td><td class="open" data-room="1BSU" data-date="2027-08-27">€340</td><td class="open" data-room="1BSU" data-date="2027-08-28">€340</td></tr><tr><td class="room">One Bedroom Swim-Up Suite</td><td class="open" data-room="SW1B" data-date="2027-08-14">€370</td><td class="open" data-room="SW1B" data-date="2027-08-15">€370</td><td class="sold" data-room="SW1B" data-date="2027-08-16">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-17">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-18">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-19">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-20">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-21">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-22">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-23">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-24">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-25">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-26">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-27">✕</td><td class="sold" data-room="SW1B" data-date="2027-08-28">✕</td></tr><tr><td class="room">Two Bedroom Apartment</td><td class="open" data-room="2B" data-date="2027-08-14">€465</td><td class="sold" data-room="2B" data-date="2027-08-15">✕</td><td class="sold" data-room="2B" data-date="2027-08-16">✕</td><td class="sold" data-room="2B" data-date="2027-08-17">✕</td><td class="sold" data-room="2B" data-date="2027-08-18">✕</td><td class="sold" data-room="2B" data-date="2027-08-19">✕</td><td class="sold" data-room="2B" data-date="2027-08-20">✕</td><td class="sold" data-room="2B" data-date="2027-08-21">✕</td><td class="sold" data-room="2B" data-date="2027-08-22">✕</td><td class="sold" data-room="2B" data-date="2027-08-23">✕</td><td class="sold" data-room="2B" data-date="2027-08-24">✕</td><td class="sold" data-room="2B" data-date="2027-08-25">✕</td><td class="sold" data-room="2B" data-date="2027-08-26">✕</td><td class="sold" data-room="2B" data-date="2027-08-27">✕</td><td class="sold" data-room="2B" data-date="2027-08-28">✕</td></tr><tr><td class="room">Two Bedroom Suite</td><td class="open" data-room="2BSU" data-date="2027-08-14">€545</td><td class="open" data-room="2BSU" data-date="2027-08-15">€545</td><td class="open" data-room="2BSU" data-date="2027-08-16">€545</td><td class="open" data-room="2BSU" data-date="2027-08-17">€545</td><td class="open" data-room="2BSU" data-date="2027-08-18">€545</td><td class="sold" data-room="2BSU" data-date="2027-08-19">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-20">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-21">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-22">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-23">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-24">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-25">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-26">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-27">✕</td><td class="sold" data-room="2BSU" data-date="2027-08-28">✕</td></tr></tbody></table></div></section>
 <section class="card" id="history"><h2>Price history</h2>
 <p class="sub">Lowest open-night price per room type, EUR per night, since 2026-09-10. 2 change(s) recorded; a point is added only when a price or availability changes.</p>
-<p class="rate-btns">Package: <button type="button" class="rate-btn active" data-rate="*">All</button><button type="button" class="rate-btn" data-rate="Standard Rate | Breakfast">Breakfast</button><button type="button" class="rate-btn" data-rate="Standard Rate | Half Board Plus">Half Board Plus</button><button type="button" class="rate-btn" data-rate="Standard Rate | All Inclusive">All Inclusive</button> <small>Colour = room, line style = package (solid, dashed, dotted).</small></p>
-<div style="position:relative;height:340px"><canvas id="priceChart"></canvas></div>
+<div id="chart-box">
+<button type="button" class="fs-close" aria-label="Exit full screen">✕</button>
+<p class="rate-btns"><button type="button" id="chart-fs">Full screen</button> Package: <button type="button" class="rate-btn active" data-rate="*">All</button><button type="button" class="rate-btn" data-rate="Standard Rate | Breakfast">Breakfast</button><button type="button" class="rate-btn" data-rate="Standard Rate | Half Board Plus">Half Board Plus</button><button type="button" class="rate-btn" data-rate="Standard Rate | All Inclusive">All Inclusive</button> <small>Colour = room, line style = package (solid, dashed, dotted).</small></p>
+<div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+</div>
 <h3>Packages now</h3>
 <div class="wrap"><table><thead><tr><th class="room">Room</th><th>Breakfast</th><th>Half Board Plus<br><small>vs Breakfast</small></th><th>All Inclusive<br><small>vs Breakfast</small></th></tr></thead>
 <tbody><tr><td class="room">One Bedroom Apartment</td><td>€295</td><td>€385 <small>(+90)</small></td><td>€460 <small>(+165)</small></td></tr><tr><td class="room">Superior One Bedroom Apartment</td><td>€305</td><td>€395 <small>(+90)</small></td><td>€470 <small>(+165)</small></td></tr><tr><td class="room">One Bedroom Suite</td><td>€340</td><td>€430 <small>(+90)</small></td><td>€505 <small>(+165)</small></td></tr><tr><td class="room">One Bedroom Swim-Up Suite</td><td>€370</td><td>€460 <small>(+90)</small></td><td>€535 <small>(+165)</small></td></tr><tr><td class="room">Two Bedroom Apartment</td><td>€465</td><td>€555 <small>(+90)</small></td><td>€630 <small>(+165)</small></td></tr><tr><td class="room">Two Bedroom Suite</td><td>€545</td><td>€635 <small>(+90)</small></td><td>€710 <small>(+165)</small></td></tr></tbody></table></div>
@@ -100,6 +114,26 @@ h3 { font-size:1rem; margin:16px 0 6px; }
       chart.update();
     });
   });
+  // Full screen: CSS overlay always (works on iPhone too), real Fullscreen API where available.
+  var box = document.getElementById('chart-box'), fsBtn = document.getElementById('chart-fs');
+  function setFs(on){
+    box.classList.toggle('fs', on);
+    fsBtn.textContent = on ? 'Exit full screen' : 'Full screen';
+    document.body.style.overflow = on ? 'hidden' : '';
+    setTimeout(function(){ chart.resize(); }, 50);
+  }
+  function enterFs(){
+    setFs(true);
+    if (box.requestFullscreen) { box.requestFullscreen().catch(function(){}); }
+  }
+  function exitFs(){
+    if (document.fullscreenElement && document.exitFullscreen) { document.exitFullscreen().catch(function(){}); }
+    setFs(false);
+  }
+  fsBtn.addEventListener('click', function(){ box.classList.contains('fs') ? exitFs() : enterFs(); });
+  box.querySelector('.fs-close').addEventListener('click', exitFs);
+  document.addEventListener('fullscreenchange', function(){ if (!document.fullscreenElement && box.classList.contains('fs')) setFs(false); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && box.classList.contains('fs')) exitFs(); });
 })();
 </script>
 </section>
@@ -114,7 +148,7 @@ here encrypted; the password decrypts it in your browser only.</p>
 <p class="msg" id="tp-msg"></p>
 <script>
 (function(){
-  var blob = {"salt": "e1ulC0/kb1t2Xqdg7Depmg==", "iv": "dKoQESO7cOugxSu9", "ct": "88g2cHvmtvU/AXKGo5nAvRRCeX/zMAN57qP5qqI9jS2Hy76+FCkJdjA=", "iter": 600000}, server = "https://ntfy.sh";
+  var blob = {"salt": "+lB0tf7p0j/IX60jUD7n4Q==", "iv": "9hSuT72EM6VEICqg", "ct": "PL4OKHIayQyPblnkF7T9AS7AfwqtaH8VVcZdWLEN55UgGbqN8L5JwS0=", "iter": 600000}, server = "https://ntfy.sh";
   var form = document.querySelector('#testpush form'), pw = document.getElementById('tp-pw'),
       remember = document.getElementById('tp-remember'), btn = document.getElementById('tp-send'),
       msg = document.getElementById('tp-msg'), KEY = 'aliathon-ntfy-topic';
