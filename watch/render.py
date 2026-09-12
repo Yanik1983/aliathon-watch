@@ -47,6 +47,17 @@ footer { color:var(--muted); font-size:12px; margin-top:16px; }
             background:var(--card); color:var(--fg); cursor:pointer; font:inherit; }
 .rate-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 h3 { font-size:1rem; margin:16px 0 6px; }
+#chart-fs { float:right; }
+#chart-box { position:relative; }
+.chart-wrap { position:relative; height:340px; }
+#chart-box .fs-close { display:none; }
+#chart-box.fs { position:fixed; inset:0; z-index:100; background:var(--card); padding:12px 12px 8px;
+                display:flex; flex-direction:column; overflow:hidden; }
+#chart-box.fs .chart-wrap { flex:1; min-height:0; height:auto; }
+#chart-box.fs .fs-close { display:block; position:absolute; top:6px; right:10px; z-index:1; width:36px; height:36px;
+                          border:1px solid var(--line); border-radius:50%; background:var(--card); color:var(--fg);
+                          font:20px/1 system-ui,sans-serif; cursor:pointer; }
+#chart-box.fs .rate-btns { padding-right:44px; margin-top:0; }
 #testpush form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 #testpush input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
                   color:var(--fg); font:inherit; min-width:180px; }
@@ -225,8 +236,11 @@ def _history_section(history: list[dict]) -> str:
     payload = json.dumps(datasets).replace("</", "<\\/")
     return f"""<section class="card" id="history"><h2>Price history</h2>
 <p class="sub">Lowest open-night price per room type, EUR per night, since {first_t}. {len(history)} change(s) recorded; a point is added only when a price or availability changes.</p>
-<p class="rate-btns">Package: {buttons} <small>Colour = room, line style = package (solid, dashed, dotted).</small></p>
-<div style="position:relative;height:340px"><canvas id="priceChart"></canvas></div>
+<div id="chart-box">
+<button type="button" class="fs-close" aria-label="Exit full screen">✕</button>
+<p class="rate-btns"><button type="button" id="chart-fs">Full screen</button> Package: {buttons} <small>Colour = room, line style = package (solid, dashed, dotted).</small></p>
+<div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+</div>
 <h3>Packages now</h3>
 <div class="wrap"><table><thead><tr><th class="room">Room</th>{head}</tr></thead>
 <tbody>{"".join(rows)}</tbody></table></div>
@@ -264,6 +278,26 @@ def _history_section(history: list[dict]) -> str:
       chart.update();
     }});
   }});
+  // Full screen: CSS overlay always (works on iPhone too), real Fullscreen API where available.
+  var box = document.getElementById('chart-box'), fsBtn = document.getElementById('chart-fs');
+  function setFs(on){{
+    box.classList.toggle('fs', on);
+    fsBtn.textContent = on ? 'Exit full screen' : 'Full screen';
+    document.body.style.overflow = on ? 'hidden' : '';
+    setTimeout(function(){{ chart.resize(); }}, 50);
+  }}
+  function enterFs(){{
+    setFs(true);
+    if (box.requestFullscreen) {{ box.requestFullscreen().catch(function(){{}}); }}
+  }}
+  function exitFs(){{
+    if (document.fullscreenElement && document.exitFullscreen) {{ document.exitFullscreen().catch(function(){{}}); }}
+    setFs(false);
+  }}
+  fsBtn.addEventListener('click', function(){{ box.classList.contains('fs') ? exitFs() : enterFs(); }});
+  box.querySelector('.fs-close').addEventListener('click', exitFs);
+  document.addEventListener('fullscreenchange', function(){{ if (!document.fullscreenElement && box.classList.contains('fs')) setFs(false); }});
+  document.addEventListener('keydown', function(e){{ if (e.key === 'Escape' && box.classList.contains('fs')) exitFs(); }});
 }})();
 </script>
 </section>"""

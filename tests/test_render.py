@@ -138,3 +138,14 @@ def test_test_push_card_embeds_encrypted_blob_only():
     assert blob["ct"] in page and blob["salt"] in page and blob["iv"] in page
     assert "my-secret-topic" not in page
     assert "https://ntfy.sh" in page
+
+
+def test_history_chart_has_full_screen_toggle():
+    from watch import history as history_mod
+
+    h = []
+    history_mod.append_if_changed(h, GRID, NOW)
+    page = render_page(GRID, {}, NOW, 0, history=h)
+    assert '<button type="button" id="chart-fs">Full screen</button>' in page
+    assert 'id="chart-box"' in page
+    assert "requestFullscreen" in page
