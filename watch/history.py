@@ -79,6 +79,49 @@ def series(history: list[dict]) -> dict[str, dict]:
     return out
 
 
+def _short_rate(rate: str) -> str:
+    return rate.split("|")[-1].strip() if "|" in rate else rate
+
+
+def _lowest(nights: dict) -> int | None:
+    prices = [p for p in nights.values() if p is not None]
+    return min(prices) if prices else None
+
+
+def _eur(price: int | None) -> str:
+    return f"€{price}" if price is not None else "sold out"
+
+
+def describe_change(prev: dict, cur: dict) -> list[str]:
+    """Human lines for what differs between two snapshots, per room and package.
+
+    Compares the lowest open-night price and counts nights that opened or closed.
+    """
+    lines: list[str] = []
+    for code, room in cur.get("rooms", {}).items():
+        name = room.get("name", code)
+        old_room = prev.get("rooms", {}).get(code)
+        old_rates = _room_rates(old_room) if old_room else {}
+        for rate, nights in _room_rates(room).items():
+            label = f"{name} ({_short_rate(rate)})"
+            old = old_rates.get(rate)
+            if old is None:
+                lines.append(f"{label}: new, {_eur(_lowest(nights))}")
+                continue
+            if old == nights:
+                continue
+            before, after = _lowest(old), _lowest(nights)
+            parts = [f"{_eur(before)} → {_eur(after)}" if before != after else _eur(after)]
+            opened = sum(1 for d, p in nights.items() if p is not None and old.get(d) is None)
+            closed = sum(1 for d, p in old.items() if p is not None and nights.get(d) is None)
+            if opened:
+                parts.append(f"{opened} night{'s' if opened != 1 else ''} opened")
+            if closed:
+                parts.append(f"{closed} night{'s' if closed != 1 else ''} closed")
+            lines.append(f"{label}: {', '.join(parts)}")
+    return lines
+
+
 def rate_names(history: list[dict]) -> list[str]:
     """All package names seen, in first-seen order."""
     names: list[str] = []

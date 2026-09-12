@@ -26,6 +26,10 @@ runs for about 5 h 50 m. A fresh job starts every 3 hours and on every code
 push, cancelling the previous one, so polling stays at a true 10-minute cadence
 even when GitHub delays scheduled runs.
 
+Every change in the per-night grid (any room, any board package: price moved,
+nights opened or closed) sends one normal-priority "price change" notification
+listing what changed. Bookable-stay alerts use high priority.
+
 If three polls fail in a row, one warning notification is sent.
 
 ## Setup

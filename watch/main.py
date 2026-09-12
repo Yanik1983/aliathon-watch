@@ -122,6 +122,17 @@ def run(
     if history_mod.append_if_changed(history, grid, now):
         history_mod.save(history_path, history)
         log.info("price history: change recorded (%d snapshots)", len(history))
+        if len(history) >= 2:
+            lines = history_mod.describe_change(history[-2], history[-1])
+            if lines:
+                notifier(
+                    "Aliathon: price change",
+                    "\n".join(lines),
+                    click=config.BASE_URL + "/",
+                    priority="default",
+                    tags="chart_with_upwards_trend",
+                )
+                log.info("notified about %d price/availability change(s)", len(lines))
 
     candidates = find_windows(
         grid,

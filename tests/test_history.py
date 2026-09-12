@@ -120,3 +120,46 @@ def test_package_price_change_appended():
     history.append_if_changed(h, g, NOW)
     g.rooms["1BED"].rates["Standard Rate | All Inclusive"][date(2027, 8, 20)] = 400
     assert history.append_if_changed(h, g, NOW + timedelta(hours=1)) is True
+
+
+def _snap(rooms):
+    return {"t": NOW.isoformat(), "rooms": rooms}
+
+
+def _room(name, nights, rate="Standard Rate | Breakfast"):
+    return {"name": name, "nights": nights, "rates": {rate: nights}}
+
+
+def test_describe_change_price_moved():
+    prev = _snap({"1BED": _room("One Bedroom Apartment", {"2027-08-20": 295, "2027-08-21": 295})})
+    cur = _snap({"1BED": _room("One Bedroom Apartment", {"2027-08-20": 310, "2027-08-21": 310})})
+    assert history.describe_change(prev, cur) == ["One Bedroom Apartment (Breakfast): €295 → €310"]
+
+
+def test_describe_change_nights_opened_and_closed():
+    prev = _snap({"1BED": _room("One Bedroom Apartment", {"2027-08-20": 295, "2027-08-21": None, "2027-08-22": None})})
+    cur = _snap({"1BED": _room("One Bedroom Apartment", {"2027-08-20": None, "2027-08-21": 295, "2027-08-22": 295})})
+    assert history.describe_change(prev, cur) == ["One Bedroom Apartment (Breakfast): €295, 2 nights opened, 1 night closed"]
+
+
+def test_describe_change_sold_out_and_back():
+    prev = _snap({"STD": _room("Studio", {"2027-08-20": 260})})
+    cur = _snap({"STD": _room("Studio", {"2027-08-20": None})})
+    assert history.describe_change(prev, cur) == ["Studio (Breakfast): €260 → sold out, 1 night closed"]
+    assert history.describe_change(cur, prev) == ["Studio (Breakfast): sold out → €260, 1 night opened"]
+
+
+def test_describe_change_ignores_unchanged_and_lists_each_package():
+    prev = _snap({"STD": {"name": "Studio", "nights": {"2027-08-20": 260},
+                          "rates": {"Standard Rate | Breakfast": {"2027-08-20": 260},
+                                    "Standard Rate | All Inclusive": {"2027-08-20": 370}}}})
+    cur = _snap({"STD": {"name": "Studio", "nights": {"2027-08-20": 260},
+                         "rates": {"Standard Rate | Breakfast": {"2027-08-20": 260},
+                                   "Standard Rate | All Inclusive": {"2027-08-20": 380}}}})
+    assert history.describe_change(prev, cur) == ["Studio (All Inclusive): €370 → €380"]
+
+
+def test_describe_change_new_room_appears():
+    prev = _snap({})
+    cur = _snap({"STD": _room("Studio", {"2027-08-20": 260})})
+    assert history.describe_change(prev, cur) == ["Studio (Breakfast): new, €260"]

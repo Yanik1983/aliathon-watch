@@ -138,13 +138,14 @@ def test_multiple_windows_one_notification(tmp_path):
 def test_disappear_then_reappear_notifies_again(tmp_path):
     sp, pp = paths(tmp_path)
     n = FakeNotifier()
+    stays = lambda: [m for m in n.sent if "bookable" in m["title"]]  # noqa: E731
     run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=n, state_path=sp, page_path=pp, now=NOW)
-    assert len(n.sent) == 1
+    assert len(stays()) == 1
     st = run(fetch=FakeFetch(), notifier=n, state_path=sp, page_path=pp, now=NOW)
     assert st["confirmed"] == {}
-    assert len(n.sent) == 1
+    assert len(stays()) == 1
     run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=n, state_path=sp, page_path=pp, now=NOW)
-    assert len(n.sent) == 2
+    assert len(stays()) == 2
 
 
 def test_unconfirmed_candidate_not_reported(tmp_path):
@@ -236,3 +237,23 @@ def test_test_push_card_absent_without_password(tmp_path, monkeypatch):
     sp, pp = paths(tmp_path)
     run(fetch=FakeFetch(), notifier=FakeNotifier(), state_path=sp, page_path=pp, now=NOW)
     assert 'id="testpush"' not in pp.read_text(encoding="utf-8")
+
+
+def test_price_change_notifies(tmp_path):
+    sp, pp = paths(tmp_path)
+    notifier = FakeNotifier()
+    before = {"1BED": days(20, 21), "STD": days(20, 22)}
+    run(fetch=FakeFetch(before), notifier=notifier, state_path=sp, page_path=pp, now=NOW)
+    assert notifier.sent == []  # first snapshot: nothing to compare with
+    run(fetch=FakeFetch(before), notifier=notifier, state_path=sp, page_path=pp, now=NOW + timedelta(minutes=10))
+    assert notifier.sent == []  # unchanged
+    after = {"1BED": days(20, 22), "STD": days(21, 22)}
+    run(fetch=FakeFetch(after), notifier=notifier, state_path=sp, page_path=pp, now=NOW + timedelta(minutes=20))
+    assert len(notifier.sent) == 1
+    n = notifier.sent[0]
+    assert n["title"] == "Aliathon: price change"
+    assert n["priority"] == "default"
+    assert n["body"] == (
+        "One Bedroom Apartment (Rate 1): €300, 1 night opened\n"
+        "Studio (Rate 1): €300, 1 night closed"
+    )
