@@ -160,8 +160,11 @@ def _short_rate(rate: str) -> str:
     return rate.split("|")[-1].strip() if "|" in rate else rate
 
 
-def _history_section(history: list[dict]) -> str:
+def _history_section(history: list[dict], now: datetime) -> str:
     series = history_mod.series(history)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+    now_iso = now.isoformat()
     if not series:
         return (
             '<section class="card" id="history"><h2>Price history</h2>'
@@ -181,13 +184,16 @@ def _history_section(history: list[dict]) -> str:
                 {
                     "label": series[code]["name"],
                     "rate": rate,
-                    "data": [{"x": t, "y": price} for t, price in pts],
+                    # The price holds until the next change, so extend every series
+                    # to the check time (hidden point) — one snapshot still draws a line.
+                    "data": [{"x": t, "y": price} for t, price in pts]
+                    + [{"x": now_iso, "y": pts[-1][1]}],
                     "borderColor": _PALETTE[i % len(_PALETTE)],
                     "backgroundColor": _PALETTE[i % len(_PALETTE)],
                     "borderWidth": 3 if code in config.TARGET_ROOMS else 1.5,
                     # Colour = room, line style = package.
                     "borderDash": _DASHES[rates.index(rate) % len(_DASHES)],
-                    "pointRadius": 3,
+                    "pointRadius": [3] * len(pts) + [0],
                     "stepped": True,
                     "spanGaps": False,
                     "hidden": False,
@@ -248,6 +254,8 @@ def _history_section(history: list[dict]) -> str:
 <script>
 (function(){{
   var datasets = {payload};
+  var xMin = Date.parse('{history[0]["t"]}'), xMax = Date.parse('{now_iso}');
+  if (!(xMax > xMin)) {{ xMax = xMin + 3600000; }}
   datasets.forEach(function(d){{ d.data = d.data.map(function(p){{ return {{x: Date.parse(p.x), y: p.y}}; }}); }});
   var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   var fg = dark ? '#ddd' : '#333', grid = dark ? '#333' : '#e5e5e5';
@@ -260,7 +268,7 @@ def _history_section(history: list[dict]) -> str:
       responsive: true, maintainAspectRatio: false, parsing: false,
       interaction: {{mode: 'nearest', intersect: false}},
       scales: {{
-        x: {{type: 'linear', ticks: {{color: fg, maxTicksLimit: 8, callback: fmt}}, grid: {{color: grid}}}},
+        x: {{type: 'linear', min: xMin, max: xMax, ticks: {{color: fg, maxTicksLimit: 8, callback: fmt}}, grid: {{color: grid}}}},
         y: {{ticks: {{color: fg, callback: function(v){{ return '€' + v; }}}}, grid: {{color: grid}}, title: {{display: true, text: 'EUR / night', color: fg}}}}
       }},
       plugins: {{
@@ -396,7 +404,7 @@ def render_page(
 {fail_html}
 {_windows_section(confirmed)}
 {_grid_section(grid)}
-{_history_section(history or [])}
+{_history_section(history or [], checked_at or datetime.now(timezone.utc))}
 {_test_push_section(test_push)}
 <script>
 (function(){{

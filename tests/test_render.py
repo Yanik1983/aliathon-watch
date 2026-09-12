@@ -149,3 +149,18 @@ def test_history_chart_has_full_screen_toggle():
     assert '<button type="button" id="chart-fs">Full screen</button>' in page
     assert 'id="chart-box"' in page
     assert "requestFullscreen" in page
+
+
+def test_history_series_extended_to_checked_time():
+    from watch import history as history_mod
+
+    h = []
+    history_mod.append_if_changed(h, GRID, NOW)
+    later = datetime(2026, 9, 12, 8, 0, tzinfo=timezone.utc)
+    page = render_page(GRID, {}, later, 0, history=h)
+    # every series ends with a hidden point at the check time so one snapshot still draws a line
+    assert page.count('{"x": "2026-09-12T08:00:00+00:00", "y": 280}') >= 1
+    assert page.count('"pointRadius": [3, 0]') == 24
+    # x axis pinned to the recorded span, not auto-stretched around a lone point
+    assert "xMin = Date.parse('2026-09-10T20:00:00+00:00')" in page
+    assert "xMax = Date.parse('2026-09-12T08:00:00+00:00')" in page
