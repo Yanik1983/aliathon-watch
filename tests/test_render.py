@@ -94,12 +94,17 @@ def test_history_chart_embedded():
     assert '"label": "One Bedroom Apartment"' in page
     assert '"y": 280' in page
     assert "1 change(s) recorded" in page
-    # one dataset per room x package, only the first package visible at load
+    # one dataset per room x package, all packages visible at load
     assert page.count('"rate": "Standard Rate | All Inclusive"') == 8
-    assert page.count('"hidden": false') == 8
-    assert page.count('"hidden": true') == 16
-    # package buttons
-    assert 'data-rate="Standard Rate | Breakfast">Breakfast</button>' in page
+    assert page.count('"hidden": false') == 24
+    assert '"hidden": true' not in page
+    # packages told apart by line style: base solid, others dashed
+    assert page.count('"borderDash": []') == 8
+    assert page.count('"borderDash": [8, 4]') == 8
+    assert page.count('"borderDash": [2, 3]') == 8
+    # package buttons, "All" active by default
+    assert 'class="rate-btn active" data-rate="*">All</button>' in page
+    assert 'class="rate-btn" data-rate="Standard Rate | Breakfast">Breakfast</button>' in page
     assert 'data-rate="Standard Rate | All Inclusive">All Inclusive</button>' in page
     # table: Studio 260 / 320 (+60) / 370 (+110)
     assert "<td>€260</td><td>€320 <small>(+60)</small></td><td>€370 <small>(+110)</small></td>" in page

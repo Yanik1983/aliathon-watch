@@ -141,6 +141,7 @@ def _grid_section(grid: Grid | None) -> str:
 
 _CHART_JS = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
 _PALETTE = ["#0b5ed7", "#d63384", "#198754", "#fd7e14", "#6f42c1", "#20c997", "#dc3545", "#6c757d"]
+_DASHES = [[], [8, 4], [2, 3], [12, 4, 2, 4]]  # per package: solid, dashed, dotted, dash-dot
 
 
 def _short_rate(rate: str) -> str:
@@ -173,10 +174,12 @@ def _history_section(history: list[dict]) -> str:
                     "borderColor": _PALETTE[i % len(_PALETTE)],
                     "backgroundColor": _PALETTE[i % len(_PALETTE)],
                     "borderWidth": 3 if code in config.TARGET_ROOMS else 1.5,
+                    # Colour = room, line style = package.
+                    "borderDash": _DASHES[rates.index(rate) % len(_DASHES)],
                     "pointRadius": 3,
                     "stepped": True,
                     "spanGaps": False,
-                    "hidden": rate != rates[0],
+                    "hidden": False,
                 }
             )
 
@@ -214,15 +217,15 @@ def _history_section(history: list[dict]) -> str:
         )
 
     first_t = history[0]["t"][:10]
-    buttons = "".join(
-        f'<button type="button" class="rate-btn{" active" if r == base else ""}" data-rate="{htmllib.escape(r)}">'
+    buttons = '<button type="button" class="rate-btn active" data-rate="*">All</button>' + "".join(
+        f'<button type="button" class="rate-btn" data-rate="{htmllib.escape(r)}">'
         f"{htmllib.escape(_short_rate(r))}</button>"
         for r in rates
     )
     payload = json.dumps(datasets).replace("</", "<\\/")
     return f"""<section class="card" id="history"><h2>Price history</h2>
 <p class="sub">Lowest open-night price per room type, EUR per night, since {first_t}. {len(history)} change(s) recorded; a point is added only when a price or availability changes.</p>
-<p class="rate-btns">Package: {buttons}</p>
+<p class="rate-btns">Package: {buttons} <small>Colour = room, line style = package (solid, dashed, dotted).</small></p>
 <div style="position:relative;height:340px"><canvas id="priceChart"></canvas></div>
 <h3>Packages now</h3>
 <div class="wrap"><table><thead><tr><th class="room">Room</th>{head}</tr></thead>
@@ -257,7 +260,7 @@ def _history_section(history: list[dict]) -> str:
     btn.addEventListener('click', function(){{
       var rate = btn.getAttribute('data-rate');
       document.querySelectorAll('.rate-btn').forEach(function(b){{ b.classList.toggle('active', b === btn); }});
-      chart.data.datasets.forEach(function(d, i){{ chart.setDatasetVisibility(i, d.rate === rate); d.hidden = d.rate !== rate; }});
+      chart.data.datasets.forEach(function(d, i){{ var show = rate === '*' || d.rate === rate; chart.setDatasetVisibility(i, show); d.hidden = !show; }});
       chart.update();
     }});
   }});
