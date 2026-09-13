@@ -35,8 +35,13 @@ NTFY_TOKEN = os.environ.get("NTFY_TOKEN", "")  # ntfy.sh account token; required
 # Password for the "send test push" card on the status page. The topic is embedded
 # encrypted with it; without a password the card is not rendered.
 PAGE_PASSWORD = os.environ.get("PAGE_PASSWORD", "")
+# Fine-grained GitHub PAT (this repo only, Actions: read/write). Embedded encrypted in the
+# page so the settings card can dispatch the "settings" workflow. Card needs all three.
+SETTINGS_TOKEN = os.environ.get("SETTINGS_TOKEN", "")
+GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "")  # "owner/repo", set by Actions
 
 # Output paths (relative to repo root)
 STATE_PATH = "state.json"
 PAGE_PATH = "docs/index.html"
 HISTORY_PATH = "history.json"
+SETTINGS_PATH = "settings.json"
