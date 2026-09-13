@@ -166,30 +166,67 @@ def test_history_series_extended_to_checked_time():
     assert "xMax = Date.parse('2026-09-12T08:00:00+00:00')" in page
 
 
-def test_page_text_and_highlight_follow_settings():
-    from watch.settings import Settings
+def _S(**kw):
+    from dataclasses import replace
+    from watch.settings import defaults
 
-    page = render_page(GRID, {}, NOW, 0, settings=Settings(("STD",), 3, 4))
+    return replace(defaults(), **kw)
+
+
+def test_page_text_and_highlight_follow_settings():
+    page = render_page(GRID, {}, NOW, 0, settings=_S(rooms=("STD",), min_nights=3, max_nights=4))
     assert "Watching for 3–4 nights in Studio" in page
     assert re.search(r'<tr class="target"><td class="room">Studio</td>', page)
     assert page.index("Studio") < page.index("One Bedroom Apartment")
 
 
-def test_settings_card_lists_grid_rooms_with_checked_state():
-    from watch.settings import Settings
+def test_page_shows_settings_dates_and_guests():
+    page = render_page(GRID, {}, NOW, 0, settings=_S(first_checkin=date(2027, 8, 10), last_checkout=date(2027, 8, 30), adults=3, children=1))
+    assert "check-in from Tue 10 Aug, check-out by Mon 30 Aug" in page
+    assert "1 room, 3 adults, 1 children" in page
+    assert "Per-night availability, 14–28 Aug 2027" in page  # grid title follows the data, not the settings
 
-    blob = {"salt": "a", "iv": "b", "ct": "c", "iter": 1}
-    page = render_page(
-        GRID, {}, NOW, 0, settings=Settings(("1BED", "ZZZ"), 5, 8), settings_card=blob, repo="me/repo"
-    )
+
+BLOB = {"salt": "a", "iv": "b", "ct": "c", "iter": 1}
+
+
+def test_settings_card_lists_grid_rooms_with_checked_state():
+    page = render_page(GRID, {}, NOW, 0, settings=_S(rooms=("1BED", "ZZZ")), settings_card=BLOB, repo="me/repo")
     assert 'id="settings"' in page
     assert re.search(r'name="room" value="1BED" checked', page)
     assert re.search(r'name="room" value="STD"(?! checked)', page)
     assert re.search(r'name="room" value="ZZZ" checked', page)  # selected but not in grid
-    assert 'id="st-min" min="1" max="15" value="5"' in page
-    assert 'id="st-max" min="1" max="15" value="8"' in page
-    assert "api.github.com/repos/me/repo/actions/workflows/settings.yml/dispatches" in page
+    assert 'id="st-min" min="1" max="30" value="5"' in page
+    assert 'id="st-max" min="1" max="30" value="8"' in page
+    assert "api.github.com/repos/me/repo/actions/workflows" in page
     assert page.count("window.aliathonDecrypt = ") == 1
+
+
+def test_settings_card_shows_every_knob_and_current_state():
+    from datetime import datetime, timezone
+
+    s = _S(first_checkin=date(2027, 8, 10), last_checkout=date(2027, 8, 30), adults=3, children=1,
+           packages=("Standard Rate | All Inclusive",), price_alerts="improvements", max_price=3000,
+           updated=datetime(2026, 9, 13, 10, 14, tzinfo=timezone.utc), client_id="abc12")
+    history = [{"t": "2026-09-10T00:00:00+00:00", "rooms": {"STD": {"name": "Studio", "nights": {},
+                "rates": {"Standard Rate | Breakfast": {}, "Standard Rate | All Inclusive": {}}}}}]
+    page = render_page(GRID, {}, NOW, 0, history, settings=s, settings_card=BLOB, repo="me/repo")
+    assert 'data-client-id="abc12"' in page
+    assert 'id="st-from" value="2027-08-10"' in page and 'id="st-to" value="2027-08-30"' in page
+    assert 'id="st-adults" min="1" max="6" value="3"' in page
+    assert 'id="st-price" min="1" step="1" value="3000"' in page
+    assert re.search(r'name="package" value="Standard Rate \| Breakfast"(?! checked)', page)
+    assert re.search(r'name="package" value="Standard Rate \| All Inclusive" checked', page)
+    assert re.search(r'name="alerts" value="improvements" checked', page)
+    assert 'id="st-poll"' in page
+    assert "Applied Sun 13 Sep 13:14 Cyprus" in page
+    assert "max €3,000" in page and "price alerts: only improvements, All Inclusive" in page
+
+
+def test_settings_card_defaults_say_nothing_saved():
+    page = render_page(GRID, {}, NOW, 0, settings=_S(), settings_card=BLOB, repo="me/repo")
+    assert "Defaults from config, nothing saved yet." in page
+    assert "No packages seen yet." in page
 
 
 def test_no_settings_card_without_blob():

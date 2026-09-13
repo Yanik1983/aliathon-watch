@@ -76,6 +76,11 @@ h3 { font-size:1rem; margin:16px 0 6px; }
 #settings legend { padding:0 4px; color:var(--muted); }
 #settings fieldset label { display:inline-block; margin:2px 14px 2px 0; }
 #settings .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:10px; }
+#settings input[type=date] { padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
+                             color:var(--fg); font:inherit; }
+#settings .current { margin:0 0 12px; padding:8px 12px; background:var(--bg); border-radius:8px; }
+#settings .current.pending { border-left:4px solid #fd7e14; }
+#settings button.secondary { background:var(--card); color:var(--fg); border:1px solid var(--line); }
 """
 
 
@@ -107,8 +112,8 @@ def _watch_text(settings: Settings, grid: Grid | None) -> str:
         else f"{settings.min_nights}–{settings.max_nights} nights"
     )
     return (
-        f"Watching for {nights} in {joined}, check-in from {_fmt_day(config.FIRST_CHECKIN)}, "
-        f"check-out by {_fmt_day(config.LAST_CHECKOUT)}."
+        f"Watching for {nights} in {joined}, check-in from {_fmt_day(settings.first_checkin)}, "
+        f"check-out by {_fmt_day(settings.last_checkout)}."
     )
 
 
@@ -141,6 +146,13 @@ def _windows_section(confirmed: dict, settings: Settings, grid: Grid | None) -> 
     )
 
 
+def _date_range(dates: list[date]) -> str:
+    a, b = dates[0], dates[-1]
+    if (a.year, a.month) == (b.year, b.month):
+        return f"{a:%d}–{b:%d %b %Y}"
+    return f"{a:%d %b} – {b:%d %b %Y}"
+
+
 def _grid_section(grid: Grid | None, settings: Settings) -> str:
     if grid is None:
         return '<section class="card"><p>No data yet — first poll has not completed.</p></section>'
@@ -167,7 +179,7 @@ def _grid_section(grid: Grid | None, settings: Settings) -> str:
             f'<tr{cls}><td class="room">{htmllib.escape(row.name)}</td>{"".join(cells)}</tr>'
         )
     return (
-        '<section class="card"><h2>Per-night availability, 14–28 Aug 2027</h2>'
+        f'<section class="card"><h2>Per-night availability, {_date_range(grid.dates)}</h2>'
         '<p class="legend"><span class="open" style="background:var(--open);color:var(--open-fg)">€ open</span>'
         '<span style="background:var(--sold);color:var(--sold-fg)">✕ sold out</span>'
         " Highlighted rooms are the ones being watched. A stay needs every night open "
@@ -408,13 +420,54 @@ here encrypted; the password decrypts it in your browser only.</p>
 </section>"""
 
 
-def _settings_section(grid: Grid | None, settings: Settings, blob: dict | None, repo: str) -> str:
+def _fmt_short(dt: datetime | None) -> str:
+    if dt is None:
+        return ""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(CYPRUS).strftime("%a %d %b %H:%M")
+
+
+_ALERT_LABELS = {
+    "all": "All changes",
+    "improvements": "Only improvements (price down or nights opened)",
+    "off": "Off",
+}
+
+
+def _current_line(settings: Settings, grid: Grid | None) -> str:
+    names = ", ".join(htmllib.escape(n) for n in _room_names(settings, grid))
+    nights = (
+        f"{settings.min_nights} nights"
+        if settings.min_nights == settings.max_nights
+        else f"{settings.min_nights}–{settings.max_nights} nights"
+    )
+    pkgs = ", ".join(htmllib.escape(_short_rate(x)) for x in settings.packages) or "all packages"
+    price = f"max €{settings.max_price:,}" if settings.max_price else "no price cap"
+    applied = (
+        f"Applied {_fmt_short(settings.updated)} Cyprus."
+        if settings.updated
+        else "Defaults from config, nothing saved yet."
+    )
+    return (
+        f"<strong>Current:</strong> {names} · {nights} · "
+        f"{_fmt_day(settings.first_checkin)} to {_fmt_day(settings.last_checkout)} · "
+        f"{settings.adults} adults, {settings.children} children · {price} · "
+        f"price alerts: {_ALERT_LABELS[settings.price_alerts].split(' (')[0].lower()}, {pkgs}. {applied}"
+    )
+
+
+def _settings_section(
+    grid: Grid | None,
+    settings: Settings,
+    blob: dict | None,
+    repo: str,
+    known_packages: list[str],
+) -> str:
     if not blob or not repo:
         return ""
     payload = _json_payload(blob)
-    url = htmllib.escape(
-        f"https://api.github.com/repos/{repo}/actions/workflows/settings.yml/dispatches"
-    )
+    api = htmllib.escape(f"https://api.github.com/repos/{repo}/actions/workflows")
     rooms = dict(grid.rooms) if grid else {}
     codes = [c for c in settings.rooms if c in rooms] + [c for c in rooms if c not in settings.rooms]
     codes += [c for c in settings.rooms if c not in rooms]
@@ -426,64 +479,133 @@ def _settings_section(grid: Grid | None, settings: Settings, blob: dict | None, 
         )
         for code in codes
     )
-    total = config.TOTAL_NIGHTS
-    return f"""<section class="card gated" id="settings"><h2>Notification settings</h2>
-<p class="sub">Which rooms to watch and how long a stay must be. Applies to bookable-stay alerts and to
-price-change pushes. Saving starts a GitHub workflow; the watcher picks the change up within 10 minutes.</p>
+    pkg_names = list(known_packages) + [x for x in settings.packages if x not in known_packages]
+    pkg_boxes = "".join(
+        '<label><input type="checkbox" name="package" value="{v}"{chk}> {name}</label>'.format(
+            v=htmllib.escape(x, quote=True),
+            chk=" checked" if x in settings.packages else "",
+            name=htmllib.escape(_short_rate(x)),
+        )
+        for x in pkg_names
+    ) or "<em>No packages seen yet.</em>"
+    radios = "".join(
+        '<label><input type="radio" name="alerts" value="{v}"{chk}> {label}</label>'.format(
+            v=v, chk=" checked" if settings.price_alerts == v else "", label=label
+        )
+        for v, label in _ALERT_LABELS.items()
+    )
+    max_price = settings.max_price if settings.max_price else ""
+    return f"""<section class="card gated" id="settings" data-client-id="{htmllib.escape(settings.client_id)}">
+<h2>Notification settings</h2>
+<p class="current" id="st-current">{_current_line(settings, grid)}</p>
+<p class="sub">Saving starts a GitHub workflow that stores the settings and polls once; this page reloads by itself
+when the change is live (about a minute). "Poll now" restarts the watcher for an immediate check.</p>
 <form autocomplete="off">
 <fieldset><legend>Rooms</legend>{boxes}</fieldset>
-<div class="row"><label>Nights: min <input type="number" id="st-min" min="1" max="{total}" value="{settings.min_nights}"></label>
-<label>max <input type="number" id="st-max" min="1" max="{total}" value="{settings.max_nights}"></label></div>
+<fieldset><legend>Stay</legend>
+<div class="row"><label>Check-in from <input type="date" id="st-from" value="{settings.first_checkin.isoformat()}"></label>
+<label>check-out by <input type="date" id="st-to" value="{settings.last_checkout.isoformat()}"></label></div>
+<div class="row"><label>Nights: min <input type="number" id="st-min" min="1" max="{settings_mod.MAX_WINDOW_NIGHTS}" value="{settings.min_nights}"></label>
+<label>max <input type="number" id="st-max" min="1" max="{settings_mod.MAX_WINDOW_NIGHTS}" value="{settings.max_nights}"></label></div>
+</fieldset>
+<fieldset><legend>Guests and budget</legend>
+<div class="row"><label>Adults <input type="number" id="st-adults" min="1" max="{settings_mod.MAX_GUESTS}" value="{settings.adults}"></label>
+<label>Children <input type="number" id="st-children" min="0" max="{settings_mod.MAX_GUESTS}" value="{settings.children}"></label>
+<label>Max total price € <input type="number" id="st-price" min="1" step="1" value="{max_price}" placeholder="none"></label></div>
+</fieldset>
+<fieldset><legend>Price-change pushes</legend>
+<div class="row">{radios}</div>
+<div>Packages (none ticked = all): {pkg_boxes}</div>
+</fieldset>
 <div class="row">
 <input type="password" id="st-pw" placeholder="Password" autocomplete="current-password">
 <label><input type="checkbox" id="st-remember"> remember on this device</label>
 <button type="submit" id="st-save">Save</button>
+<button type="button" id="st-poll" class="secondary">Poll now</button>
 </div>
 </form>
 <p class="msg" id="st-msg"></p>
 <script>
 (function(){{
-  var blob = {payload}, url = "{url}", TOTAL = {total};
-  var form = document.querySelector('#settings form'), pw = document.getElementById('st-pw'),
-      remember = document.getElementById('st-remember'), btn = document.getElementById('st-save'),
-      msg = document.getElementById('st-msg'), minEl = document.getElementById('st-min'),
-      maxEl = document.getElementById('st-max'), KEY = 'aliathon-settings-token';
+  var blob = {payload}, api = "{api}", MAX_WINDOW = {settings_mod.MAX_WINDOW_NIGHTS}, MAX_GUESTS = {settings_mod.MAX_GUESTS};
+  var card = document.getElementById('settings'), form = card.querySelector('form'),
+      pw = document.getElementById('st-pw'), remember = document.getElementById('st-remember'),
+      btn = document.getElementById('st-save'), pollBtn = document.getElementById('st-poll'),
+      msg = document.getElementById('st-msg'), current = document.getElementById('st-current'),
+      KEY = 'aliathon-settings-token', PENDING = 'aliathon-settings-pending';
+  function $(id){{ return document.getElementById(id); }}
   function say(text, cls){{ msg.textContent = text; msg.className = 'msg ' + (cls || ''); }}
   function saved(){{ try {{ return localStorage.getItem(KEY) || ''; }} catch (e) {{ return ''; }} }}
-  function chosen(){{ return Array.prototype.map.call(form.querySelectorAll('input[name=room]:checked'), function(el){{ return el.value; }}); }}
-  function check(){{
-    var lo = parseInt(minEl.value, 10), hi = parseInt(maxEl.value, 10);
-    if (!chosen().length) return 'Select at least one room.';
-    if (!(lo >= 1 && hi <= TOTAL && lo <= hi)) return 'Nights must satisfy 1 \\u2264 min \\u2264 max \\u2264 ' + TOTAL + '.';
-    return '';
+  function store(k, v){{ try {{ if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }} catch (e) {{}} }}
+  function get(k){{ try {{ return localStorage.getItem(k); }} catch (e) {{ return null; }} }}
+  function checked(name){{ return Array.prototype.map.call(form.querySelectorAll('input[name=' + name + ']:checked'), function(el){{ return el.value; }}); }}
+  function num(id){{ return parseInt($(id).value, 10); }}
+  function daysBetween(a, b){{ return Math.round((Date.parse(b) - Date.parse(a)) / 86400000); }}
+  function payloadOrError(){{
+    var rooms = checked('room'), from = $('st-from').value, to = $('st-to').value, window_ = daysBetween(from, to);
+    var lo = num('st-min'), hi = num('st-max'), adults = num('st-adults'), children = num('st-children');
+    var price = $('st-price').value.trim();
+    if (!rooms.length) return {{error: 'Select at least one room.'}};
+    if (!from || !to || !(window_ >= 1 && window_ <= MAX_WINDOW)) return {{error: 'Check-out must be 1 to ' + MAX_WINDOW + ' nights after check-in.'}};
+    if (!(lo >= 1 && lo <= hi && hi <= window_)) return {{error: 'Nights must satisfy 1 \\u2264 min \\u2264 max \\u2264 ' + window_ + ' (the date window).'}};
+    if (!(adults >= 1 && adults <= MAX_GUESTS && children >= 0 && children <= MAX_GUESTS)) return {{error: 'Adults 1-' + MAX_GUESTS + ', children 0-' + MAX_GUESTS + '.'}};
+    if (price && !(parseInt(price, 10) >= 1)) return {{error: 'Max price must be a positive number or empty.'}};
+    var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    return {{data: {{rooms: rooms, first_checkin: from, last_checkout: to, min_nights: lo, max_nights: hi,
+      adults: adults, children: children, max_price: price ? parseInt(price, 10) : null,
+      packages: checked('package'), price_alerts: (checked('alerts')[0] || 'all'), client_id: id}}}};
   }}
-  function dispatch(token){{
-    return fetch(url, {{method: 'POST',
+  function dispatch(token, workflow, inputs){{
+    return fetch(api + '/' + workflow + '/dispatches', {{method: 'POST',
       headers: {{'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json'}},
-      body: JSON.stringify({{ref: 'main', inputs: {{rooms: chosen().join(','),
-        min_nights: String(parseInt(minEl.value, 10)), max_nights: String(parseInt(maxEl.value, 10))}}}})}});
+      body: JSON.stringify({{ref: 'main', inputs: inputs}})}});
   }}
-  if (saved()) {{ pw.placeholder = 'Password (remembered)'; remember.checked = true; }}
-  if (!(window.crypto && crypto.subtle)) {{ say('This browser cannot decrypt here (needs https).', 'err'); btn.disabled = true; }}
-  form.addEventListener('submit', function(ev){{
-    ev.preventDefault();
-    var problem = check();
-    if (problem) {{ say(problem, 'err'); return; }}
-    btn.disabled = true; say('Working…');
+  function withToken(fn){{
     var tokenP = (!pw.value && saved()) ? Promise.resolve(saved()) : aliathonDecrypt(blob, pw.value);
-    tokenP.then(function(token){{
-      try {{ if (remember.checked) localStorage.setItem(KEY, token); else localStorage.removeItem(KEY); }} catch (e) {{}}
-      return dispatch(token);
+    return tokenP.then(function(token){{
+      store(KEY, remember.checked ? token : null);
+      return fn(token);
     }}).then(function(resp){{
-      if (resp.status === 204) {{ say('Saved. The watcher picks it up within 10 minutes.', 'ok'); return; }}
-      if (resp.status === 401) {{ try {{ localStorage.removeItem(KEY); }} catch (x) {{}} }}
-      return resp.text().then(function(t){{ say('GitHub returned ' + resp.status + ': ' + t.slice(0, 200), 'err'); }});
+      if (resp.status === 204) return true;
+      if (resp.status === 401) store(KEY, null);
+      return resp.text().then(function(t){{ say('GitHub returned ' + resp.status + ': ' + t.slice(0, 200), 'err'); return false; }});
     }}).catch(function(e){{
       var wrong = e && (e.name === 'OperationError' || /decrypt/i.test(String(e)));
       say(wrong ? 'Wrong password.' : 'Failed: ' + (e && e.message || e), 'err');
-      if (wrong) {{ try {{ localStorage.removeItem(KEY); }} catch (x) {{}} }}
-    }}).then(function(){{ btn.disabled = false; pw.value = ''; }});
+      if (wrong) store(KEY, null);
+      return false;
+    }});
+  }}
+  function busy(on){{ btn.disabled = on; pollBtn.disabled = on; if (!on) pw.value = ''; }}
+  // A save is "pending" until a page carrying its client_id is served.
+  var pending = get(PENDING);
+  if (pending) {{
+    if (card.getAttribute('data-client-id') === pending) {{ store(PENDING, null); }}
+    else {{
+      current.classList.add('pending');
+      current.innerHTML += ' <strong>Saved, waiting for the watcher to apply it… this page reloads every 30 s.</strong>';
+      setTimeout(function(){{ location.reload(); }}, 30000);
+    }}
+  }}
+  if (saved()) {{ pw.placeholder = 'Password (remembered)'; remember.checked = true; }}
+  if (!(window.crypto && crypto.subtle)) {{ say('This browser cannot decrypt here (needs https).', 'err'); busy(true); }}
+  form.addEventListener('submit', function(ev){{
+    ev.preventDefault();
+    var p = payloadOrError();
+    if (p.error) {{ say(p.error, 'err'); return; }}
+    busy(true); say('Working…');
+    withToken(function(token){{ return dispatch(token, 'settings.yml', {{settings: JSON.stringify(p.data)}}); }})
+      .then(function(ok){{
+        if (ok) {{ store(PENDING, p.data.client_id); say('Saved. Applying takes about a minute; the page reloads by itself.', 'ok');
+                  setTimeout(function(){{ location.reload(); }}, 45000); }}
+        busy(false);
+      }});
+  }});
+  pollBtn.addEventListener('click', function(){{
+    busy(true); say('Working…');
+    withToken(function(token){{ return dispatch(token, 'poll.yml', {{}}); }})
+      .then(function(ok){{ if (ok) say('Poll started. Fresh data in about a minute.', 'ok'); busy(false); }});
   }});
 }})();
 </script>
@@ -529,7 +651,7 @@ def render_page(
 {_grid_section(grid, settings)}
 {_history_section(history or [], checked_at or datetime.now(timezone.utc), settings)}
 {_DECRYPT_JS if (test_push or settings_card) else ""}
-{_settings_section(grid, settings, settings_card, repo)}
+{_settings_section(grid, settings, settings_card, repo, history_mod.rate_names(history or []))}
 {_test_push_section(test_push)}
 <script>
 (function(){{
@@ -541,7 +663,7 @@ def render_page(
   tick(); setInterval(tick, 30000);
 }})();
 </script>
-<footer>Source: aliathonaegean.reserve-online.net availability for 1 room, 2 adults, 2 children. Prices in EUR per night, lowest rate shown.</footer>
+<footer>Source: aliathonaegean.reserve-online.net availability for 1 room, {settings.adults} adults, {settings.children} children. Prices in EUR per night, lowest rate shown.</footer>
 </main>
 </body>
 </html>
