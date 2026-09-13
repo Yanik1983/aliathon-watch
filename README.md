@@ -19,7 +19,8 @@ can be changed from the status page (see "Notification settings" below).
 3. Each candidate is confirmed with a second request using those exact dates;
    only rows the hotel marks `AVL` count (this catches minimum-stay rules).
 4. New confirmed stays that were not present in the previous poll trigger one
-   ntfy notification (push to phone, email copy if configured).
+   ntfy notification (push to phone, email copy if configured). Stays that
+   disappear again trigger a normal-priority "no longer bookable" push.
 5. `state.json`, `history.json` and `docs/index.html` are committed back;
    GitHub Pages serves the page from `docs/`.
 
@@ -28,20 +29,35 @@ runs for about 5 h 50 m. A fresh job starts every 3 hours and on every code
 push, cancelling the previous one, so polling stays at a true 10-minute cadence
 even when GitHub delays scheduled runs.
 
-Every change in the per-night grid of a watched room (any board package: price
-moved, nights opened or closed) sends one normal-priority "price change"
-notification listing what changed. Bookable-stay alerts use high priority.
+Every change in the per-night grid of a watched room (price moved, nights
+opened or closed) sends one normal-priority "price change" notification
+listing what changed. The settings card can limit this to chosen board
+packages, to improvements only (price down or nights opened), or switch it
+off. Bookable-stay alerts use high priority.
+
+If three polls fail in a row, one warning notification is sent. A separate
+`watchdog` workflow runs hourly and sends a high-priority "watcher silent" push
+when `state.json` shows no poll attempt for 30 minutes (GitHub may delay it).
 
 ## Notification settings
 
-The status page has a password-gated "Notification settings" card: tick the
-room types to watch, set the minimum and maximum nights, enter the page
-password and save. The browser decrypts a GitHub token embedded in the page and
-starts the `settings` workflow, which validates the values, commits
-`settings.json` and sends a low-priority confirmation push. The poll loop
-rebases onto `main` before every poll, so the change is live within 10 minutes.
-`settings.json` overrides `TARGET_ROOMS`, `MIN_NIGHTS` and `MAX_NIGHTS` from
-`watch/config.py`; if the file is missing or invalid the defaults apply.
+The status page has a password-gated "Notification settings" card with every
+knob: room types, check-in / check-out window (1 to 30 nights), minimum and
+maximum nights, adults and children, a cap on the total stay price, and the
+price-change push mode and packages. Enter the page password and Save. The
+browser decrypts a GitHub token embedded in the page and starts the `settings`
+workflow, which validates the values, commits `settings.json`, polls once (so
+the page and any bookable-stay alert reflect the change within about a minute)
+and sends a low-priority confirmation push. The card shows the settings
+currently applied and reloads the page by itself until a save is live. The
+"Poll now" button restarts the poll job for an immediate check.
+
+`settings.json` overrides the search values in `watch/config.py`; if the file
+is missing or invalid the defaults apply. It can also be written by hand:
+`python -m watch.settings --json '{"rooms":["1BED"],"max_nights":7}'`.
+Only a 15-night window has been tested against the booking engine; if a wider
+window makes polls fail, the failure alert fires after 3 polls and the card
+can narrow it again.
 
 If three polls fail in a row, one warning notification is sent.
 
@@ -73,6 +89,11 @@ If three polls fail in a row, one warning notification is sent.
      the token, stores the secret, restarts the poll job and waits for the
      card to appear. It is embedded in the page encrypted with
      `PAGE_PASSWORD`, like the topic.
+   - `HEALTHCHECK_URL` — optional. A ping URL from https://healthchecks.io
+     (free; create a check with period 10 min, grace 20 min, and add an ntfy
+     integration there). Every poll pings it, so you get an alert even if
+     GitHub Actions as a whole stops running the job. The built-in `watchdog`
+     workflow covers the common case without this.
    - optional repository variable `NTFY_SERVER` for a self-hosted ntfy
 3. GitHub Pages: Settings > Pages > Source: Deploy from a branch, branch
    `main`, folder `/docs`.
@@ -91,11 +112,11 @@ Without `NTFY_TOPIC` the poll still runs and writes `state.json` and
 
 ## Changing the search
 
-Rooms and nights range: use the "Notification settings" card on the status
-page, or run the `settings` workflow from the Actions tab, or edit
-`settings.json` by hand (`python -m watch.settings --rooms 1BED,S1BED --min 5 --max 8`).
+Use the "Notification settings" card on the status page, or run the
+`settings` workflow from the Actions tab with a JSON object, or
+`python -m watch.settings --json '{...}'` locally and commit `settings.json`.
 
-Dates, guests and defaults: edit `watch/config.py`: `TARGET_ROOMS`,
-`MIN_NIGHTS`, `MAX_NIGHTS`, `FIRST_CHECKIN`, `LAST_CHECKOUT`, `ADULTS`,
-`CHILDREN`. Room codes seen on the site: `STD`, `SSTD`, `1BED`, `S1BED`,
-`1BSU`, `SW1B`, `2B`, `2BSU`.
+Defaults live in `watch/config.py`: `TARGET_ROOMS`, `MIN_NIGHTS`,
+`MAX_NIGHTS`, `FIRST_CHECKIN`, `LAST_CHECKOUT`, `ADULTS`, `CHILDREN`. Room
+codes seen on the site: `STD`, `SSTD`, `1BED`, `S1BED`, `1BSU`, `SW1B`, `2B`,
+`2BSU`.

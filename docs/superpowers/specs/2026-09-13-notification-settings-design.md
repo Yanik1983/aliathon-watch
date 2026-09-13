@@ -144,3 +144,32 @@ returns defaults from `config.py` (`TARGET_ROOMS`, `MIN_NIGHTS`, `MAX_NIGHTS`).
    Repository permissions: Actions = Read and write. Expiry: choose long.
 2. `gh secret set SETTINGS_TOKEN` with the token.
 3. Push once (or run the poll workflow) so the page renders the card.
+
+## Addendum (2026-09-13, later the same day): items 1–6
+
+Approved after the first version went live.
+
+1. **Dead-watcher alert.** `watch/watchdog.py` + `.github/workflows/watchdog.yml`
+   (hourly cron, `workflow_dispatch`). If `state.json` shows no poll attempt in
+   30 minutes: high-priority push "Aliathon watcher silent" with the age and a
+   link to Actions. Optional `HEALTHCHECK_URL` secret: the poll loop pings it
+   after every poll for an external dead-man switch.
+2. **Instant apply.** The `settings` workflow runs `python -m watch.main` after
+   writing `settings.json` and commits state, history and page too. The card
+   has a "Poll now" button that dispatches the `poll` workflow.
+3. **Gone push.** Stays present in the previous poll but not confirmed now
+   trigger "Aliathon: N stay(s) no longer bookable" (default priority).
+4. **Price-change control.** Settings gain `packages` (rate names; empty = all)
+   and `price_alerts` (`all` | `improvements` | `off`). `describe_change`
+   takes both; "improvements" keeps lines where the lowest price fell (or went
+   from sold out to priced) or nights opened.
+5. **Applied state.** Card shows a "Current: …, applied HH:MM Cyprus" line.
+   Each save carries a random `client_id`; the page embeds the applied one in
+   `data-client-id`. After a save the browser keeps the id in `localStorage`
+   and reloads every 30 s until the page carries it.
+6. **More knobs.** `first_checkin`, `last_checkout` (window 1–30 nights),
+   `adults` (1–6), `children` (0–6), `max_price` (total stay cap, null = none).
+   The grid fetch, confirmation queries and Book links use them.
+
+Settings JSON is one `workflow_dispatch` input named `settings`. Old
+three-key files still load (missing keys take config defaults).
