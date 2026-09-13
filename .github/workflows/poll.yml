@@ -45,6 +45,7 @@ jobs:
           NTFY_EMAIL: ${{ secrets.NTFY_EMAIL }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
+          SETTINGS_TOKEN: ${{ secrets.SETTINGS_TOKEN }}
           NTFY_SERVER: ${{ vars.NTFY_SERVER }}
         run: |
           git config user.name "github-actions[bot]"
@@ -54,6 +55,19 @@ jobs:
           while [ "$(date +%s)" -lt "$end" ]; do
             n=$((n + 1))
             echo "::group::poll #$n $(date -u +'%Y-%m-%d %H:%M UTC')"
+            # Pick up settings.json (written by the settings workflow) and anything
+            # else that landed upstream since the last iteration, before polling.
+            git fetch -q origin main
+            if [ "$(git rev-list --count HEAD..origin/main)" -gt 0 ]; then
+              # Generated files always win over whatever landed upstream meanwhile.
+              local_head=$(git rev-parse HEAD)
+              if ! git pull -q --rebase -X theirs origin main; then
+                git rebase --abort || true
+                git reset -q --hard origin/main
+                git checkout "$local_head" -- state.json history.json docs/index.html
+                git commit -q -m "chore: poll $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]" || true
+              fi
+            fi
             python -m watch.main || echo "poll exited non-zero"
             git add state.json history.json docs/index.html
             if git diff --cached --quiet; then
@@ -61,16 +75,7 @@ jobs:
             else
               git commit -q -m "chore: poll $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
             fi
-            git fetch -q origin main
             if [ "$(git rev-list --count origin/main..HEAD)" -gt 0 ]; then
-              # Generated files always win over whatever landed upstream meanwhile.
-              local_head=$(git rev-parse HEAD)
-              if ! git pull -q --rebase -X theirs origin main; then
-                git rebase --abort || true
-                git reset -q --hard origin/main
-                git checkout "$local_head" -- state.json history.json docs/index.html
-                git commit -q -m "chore: poll $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
-              fi
               git push -q origin HEAD:main || echo "push failed; will retry next iteration"
             fi
             echo "::endgroup::"
