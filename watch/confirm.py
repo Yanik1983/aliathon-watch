@@ -30,15 +30,23 @@ class ConfirmedWindow:
     url: str
 
 
-def booking_url(checkin: date, nights: int) -> str:
+def booking_url(
+    checkin: date, nights: int, adults: int = config.ADULTS, children: int = config.CHILDREN
+) -> str:
     return (
         f"{config.BASE_URL}/?checkin={checkin.isoformat()}&nights={nights}"
-        f"&rooms={config.ROOMS}&adults={config.ADULTS}"
-        f"&children={config.CHILDREN}&infants={config.INFANTS}"
+        f"&rooms={config.ROOMS}&adults={adults}"
+        f"&children={children}&infants={config.INFANTS}"
     )
 
 
-def confirm(window: Window, fetch: Fetch = fetch_avl) -> ConfirmedWindow | None:
+def confirm(
+    window: Window,
+    fetch: Fetch = fetch_avl,
+    adults: int = config.ADULTS,
+    children: int = config.CHILDREN,
+) -> ConfirmedWindow | None:
+    """Query the exact dates; ``fetch`` must already be bound to the guests."""
     try:
         html = fetch(window.checkin, window.nights)
         grid = parse_grid(html)
@@ -54,5 +62,5 @@ def confirm(window: Window, fetch: Fetch = fetch_avl) -> ConfirmedWindow | None:
         window=window,
         room_name=row.name,
         price=total or window.total,
-        url=booking_url(window.checkin, window.nights),
+        url=booking_url(window.checkin, window.nights, adults, children),
     )

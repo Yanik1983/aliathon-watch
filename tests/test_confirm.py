@@ -57,3 +57,9 @@ def test_confirm_fetch_error_returns_none():
 def test_confirm_garbage_html_returns_none():
     w = Window(room="STD", checkin=date(2027, 8, 14), nights=7, total=1820)
     assert confirm(w, fetch=lambda f, n: "<p>nope</p>") is None
+
+
+def test_booking_url_takes_guests():
+    from watch.confirm import booking_url
+    url = booking_url(date(2027, 8, 20), 5, adults=3, children=1)
+    assert "adults=3" in url and "children=1" in url

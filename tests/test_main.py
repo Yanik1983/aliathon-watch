@@ -50,8 +50,9 @@ class FakeFetch:
         self.fail = fail
         self.calls = []
 
-    def __call__(self, fromd, nights):
+    def __call__(self, fromd, nights, adults=2, children=2):
         self.calls.append((fromd, nights))
+        self.guests = (adults, children)
         if self.fail:
             raise FetchError("boom")
         if not self.open_nights:
@@ -69,7 +70,7 @@ class FakeNotifier:
         self.sent = []
 
     def __call__(self, title, body, click=None, priority="high", tags="hotel,bell"):
-        self.sent.append({"title": title, "body": body, "click": click, "priority": priority})
+        self.sent.append({"title": title, "body": body, "click": click, "priority": priority, "tags": tags})
         return True
 
 
@@ -139,7 +140,7 @@ def test_multiple_windows_one_notification(tmp_path):
 def test_disappear_then_reappear_notifies_again(tmp_path):
     sp, pp = paths(tmp_path)
     n = FakeNotifier()
-    stays = lambda: [m for m in n.sent if "bookable" in m["title"]]  # noqa: E731
+    stays = lambda: [m for m in n.sent if "bookable stay" in m["title"]]  # noqa: E731
     run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=n, state_path=sp, page_path=pp, now=NOW)
     assert len(stays()) == 1
     st = run(fetch=FakeFetch(), notifier=n, state_path=sp, page_path=pp, now=NOW)
@@ -154,7 +155,7 @@ def test_unconfirmed_candidate_not_reported(tmp_path):
     sp, pp = paths(tmp_path)
 
     class GridOnly(FakeFetch):
-        def __call__(self, fromd, nights):
+        def __call__(self, fromd, nights, **_):
             return synth_html(self.open_nights, fromd, nights, avl_rooms=())
 
     n = FakeNotifier()
@@ -192,7 +193,7 @@ def test_failure_keeps_previous_grid(tmp_path):
 def test_empty_grid_counts_as_failure(tmp_path):
     sp, pp = paths(tmp_path)
     n = FakeNotifier()
-    st = run(fetch=lambda f, k: "<table></table>", notifier=n, state_path=sp, page_path=pp, now=NOW)
+    st = run(fetch=lambda f, k, **_: "<table></table>", notifier=n, state_path=sp, page_path=pp, now=NOW)
     assert st["fail_count"] == 1
 
 
@@ -307,3 +308,51 @@ def test_settings_card_absent_without_token(tmp_path, monkeypatch):
     sp, pp = paths(tmp_path)
     run(fetch=FakeFetch(), notifier=FakeNotifier(), state_path=sp, page_path=pp, now=NOW)
     assert 'id="settings"' not in pp.read_text(encoding="utf-8")
+
+
+def test_gone_stay_sends_push(tmp_path):
+    sp, pp = paths(tmp_path)
+    notifier = FakeNotifier()
+    run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=notifier, state_path=sp, page_path=pp, now=NOW)
+    assert notifier.sent[-1]["title"] == "Aliathon: 1 bookable stay!"
+    run(fetch=FakeFetch({"1BED": days(20, 22)}), notifier=notifier, state_path=sp, page_path=pp,
+        now=NOW + timedelta(minutes=10))
+    gone = [n for n in notifier.sent if "no longer bookable" in n["title"]]
+    assert len(gone) == 1
+    assert gone[0]["priority"] == "default"
+    assert "One Bedroom Apartment: Fri 20 Aug -> Wed 25 Aug (5 nights)" in gone[0]["body"]
+
+
+def test_max_price_filters_confirmed_stays(tmp_path):
+    sp, pp = paths(tmp_path)
+    (tmp_path / "settings.json").write_text(
+        json.dumps({"rooms": ["1BED"], "max_price": 1000}), encoding="utf-8")
+    notifier = FakeNotifier()
+    st = run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=notifier, state_path=sp, page_path=pp, now=NOW)
+    assert st["confirmed"] == {}  # 5 nights x EUR 300 = 1500 > cap
+    assert not [n for n in notifier.sent if "bookable stay" in n["title"]]
+
+
+def test_settings_dates_and_guests_reach_fetch_and_url(tmp_path):
+    sp, pp = paths(tmp_path)
+    (tmp_path / "settings.json").write_text(json.dumps({
+        "rooms": ["1BED"], "first_checkin": "2027-08-18", "last_checkout": "2027-08-25",
+        "min_nights": 5, "max_nights": 5, "adults": 3, "children": 0}), encoding="utf-8")
+    fetch = FakeFetch({"1BED": days(18, 24)})
+    notifier = FakeNotifier()
+    st = run(fetch=fetch, notifier=notifier, state_path=sp, page_path=pp, now=NOW)
+    assert fetch.calls[0] == (date(2027, 8, 18), 7)
+    assert fetch.guests == (3, 0)
+    assert list(st["confirmed"]) == ["1BED|2027-08-18|5", "1BED|2027-08-19|5", "1BED|2027-08-20|5"]
+    assert "adults=3&children=0" in st["confirmed"]["1BED|2027-08-18|5"]["url"]
+
+
+def test_price_alert_mode_off_silences_price_pushes(tmp_path):
+    sp, pp = paths(tmp_path)
+    (tmp_path / "settings.json").write_text(
+        json.dumps({"rooms": ["1BED"], "price_alerts": "off"}), encoding="utf-8")
+    notifier = FakeNotifier()
+    run(fetch=FakeFetch({"1BED": days(20, 21)}), notifier=notifier, state_path=sp, page_path=pp, now=NOW)
+    run(fetch=FakeFetch({"1BED": days(20, 22)}), notifier=notifier, state_path=sp, page_path=pp,
+        now=NOW + timedelta(minutes=10))
+    assert not [n for n in notifier.sent if n["title"] == "Aliathon: price change"]

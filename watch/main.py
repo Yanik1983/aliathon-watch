@@ -131,8 +131,11 @@ def run(
         ",".join(settings.rooms), settings.min_nights, settings.max_nights,
     )
 
+    def fetch_for_guests(fromd: date, nights: int) -> str:
+        return fetch(fromd, nights, adults=settings.adults, children=settings.children)
+
     try:
-        grid = parse_grid(fetch(config.FIRST_CHECKIN, config.TOTAL_NIGHTS))
+        grid = parse_grid(fetch_for_guests(settings.first_checkin, settings.total_nights))
     except (FetchError, ParseError) as e:
         st["fail_count"] = int(st.get("fail_count", 0)) + 1
         log.error("poll failed (%d in a row): %s", st["fail_count"], e)
@@ -154,7 +157,13 @@ def run(
         history_mod.save(history_path, history)
         log.info("price history: change recorded (%d snapshots)", len(history))
         if len(history) >= 2:
-            lines = history_mod.describe_change(history[-2], history[-1], rooms=settings.rooms)
+            lines = history_mod.describe_change(
+                history[-2],
+                history[-1],
+                rooms=settings.rooms,
+                packages=settings.packages,
+                mode=settings.price_alerts,
+            )
             if lines:
                 notifier(
                     "Aliathon: price change",
@@ -170,17 +179,20 @@ def run(
         rooms=settings.rooms,
         min_nights=settings.min_nights,
         max_nights=settings.max_nights,
-        first_checkin=config.FIRST_CHECKIN,
-        last_checkout=config.LAST_CHECKOUT,
+        first_checkin=settings.first_checkin,
+        last_checkout=settings.last_checkout,
     )
     log.info("%d candidate window(s) from grid", len(candidates))
 
     previous: dict = st.get("confirmed") or {}
     confirmed_now: dict = {}
     for w in candidates:
-        c = confirm(w, fetch=fetch)
+        c = confirm(w, fetch=fetch_for_guests, adults=settings.adults, children=settings.children)
         if c is None:
             log.info("candidate %s not confirmed", w.key)
+            continue
+        if settings.max_price is not None and c.price > settings.max_price:
+            log.info("candidate %s costs EUR %s, above the EUR %s cap", w.key, c.price, settings.max_price)
             continue
         entry = _entry(c, now)
         if w.key in previous:
@@ -197,6 +209,14 @@ def run(
     gone = [k for k in previous if k not in confirmed_now]
     if gone:
         log.info("%d window(s) no longer available: %s", len(gone), ", ".join(gone))
+        n = len(gone)
+        notifier(
+            f"Aliathon: {n} stay{'s' if n != 1 else ''} no longer bookable",
+            "\n".join(_describe(previous[k]) for k in gone),
+            click=config.BASE_URL + "/",
+            priority="default",
+            tags="x",
+        )
 
     st["confirmed"] = confirmed_now
     return _finish(st, grid, state_path, page_path, now, history, settings)

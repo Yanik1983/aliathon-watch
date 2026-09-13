@@ -32,14 +32,16 @@ def fetch_avl(
     retries: int = 1,
     retry_delay: float = 5.0,
     timeout: float = 30.0,
+    adults: int = config.ADULTS,
+    children: int = config.CHILDREN,
 ) -> str:
     """POST the availability form and return the html fragment."""
     form = {
         "fromd": fromd.isoformat(),
         "nights": str(nights),
         "rooms": str(config.ROOMS),
-        "adults": str(config.ADULTS),
-        "children": str(config.CHILDREN),
+        "adults": str(adults),
+        "children": str(children),
         "infants": str(config.INFANTS),
         "voucher": "",
     }
