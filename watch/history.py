@@ -93,13 +93,24 @@ def _eur(price: int | None) -> str:
     return f"€{price}" if price is not None else "sold out"
 
 
-def describe_change(prev: dict, cur: dict, rooms: Iterable[str] | None = None) -> list[str]:
+def describe_change(
+    prev: dict,
+    cur: dict,
+    rooms: Iterable[str] | None = None,
+    packages: Iterable[str] | None = None,
+    mode: str = "all",
+) -> list[str]:
     """Human lines for what differs between two snapshots, per room and package.
 
     Compares the lowest open-night price and counts nights that opened or closed.
-    ``rooms`` limits the output to those room codes; ``None`` means every room.
+    ``rooms`` limits the output to those room codes (``None`` = every room);
+    ``packages`` to those rate names (``None`` or empty = every package).
+    ``mode``: "all", "improvements" (only price drops and nights that opened), "off".
     """
+    if mode == "off":
+        return []
     wanted = set(rooms) if rooms is not None else None
+    wanted_pkgs = set(packages) if packages else None
     lines: list[str] = []
     for code, room in cur.get("rooms", {}).items():
         if wanted is not None and code not in wanted:
@@ -108,9 +119,13 @@ def describe_change(prev: dict, cur: dict, rooms: Iterable[str] | None = None) -
         old_room = prev.get("rooms", {}).get(code)
         old_rates = _room_rates(old_room) if old_room else {}
         for rate, nights in _room_rates(room).items():
+            if wanted_pkgs is not None and rate not in wanted_pkgs:
+                continue
             label = f"{name} ({_short_rate(rate)})"
             old = old_rates.get(rate)
             if old is None:
+                if mode == "improvements" and _lowest(nights) is None:
+                    continue
                 lines.append(f"{label}: new, {_eur(_lowest(nights))}")
                 continue
             if old == nights:
@@ -123,6 +138,10 @@ def describe_change(prev: dict, cur: dict, rooms: Iterable[str] | None = None) -
                 parts.append(f"{opened} night{'s' if opened != 1 else ''} opened")
             if closed:
                 parts.append(f"{closed} night{'s' if closed != 1 else ''} closed")
+            if mode == "improvements":
+                cheaper = after is not None and (before is None or after < before)
+                if not (cheaper or opened):
+                    continue
             lines.append(f"{label}: {', '.join(parts)}")
     return lines
 

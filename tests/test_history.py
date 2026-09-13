@@ -173,3 +173,34 @@ def test_describe_change_filters_rooms():
     assert history.describe_change(prev, cur, rooms=["1BED"]) == ["One Bedroom Apartment (Breakfast): €295 → €310"]
     assert history.describe_change(prev, cur, rooms=["2B"]) == []
     assert len(history.describe_change(prev, cur)) == 2
+
+
+def _two_pkg(bf, ai):
+    return {"name": "Studio", "nights": bf,
+            "rates": {"Standard Rate | Breakfast": bf, "Standard Rate | All Inclusive": ai}}
+
+
+def test_describe_change_filters_packages():
+    prev = _snap({"STD": _two_pkg({"2027-08-20": 260}, {"2027-08-20": 370})})
+    cur = _snap({"STD": _two_pkg({"2027-08-20": 250}, {"2027-08-20": 380})})
+    assert history.describe_change(prev, cur, packages=["Standard Rate | All Inclusive"]) == [
+        "Studio (All Inclusive): €370 → €380"
+    ]
+    assert len(history.describe_change(prev, cur, packages=[])) == 2  # empty = all
+
+
+def test_describe_change_improvements_only():
+    prev = _snap({"STD": _room("Studio", {"2027-08-20": 260, "2027-08-21": None}),
+                  "1BED": _room("One Bedroom Apartment", {"2027-08-20": 295}),
+                  "2B": _room("Two Bedroom Apartment", {"2027-08-20": None}),
+                  "SW1B": _room("Swim-Up", {"2027-08-20": 300, "2027-08-21": 300})})
+    cur = _snap({"STD": _room("Studio", {"2027-08-20": 260, "2027-08-21": 260}),   # night opened
+                 "1BED": _room("One Bedroom Apartment", {"2027-08-20": 310}),       # price up
+                 "2B": _room("Two Bedroom Apartment", {"2027-08-20": 465}),         # sold out -> price
+                 "SW1B": _room("Swim-Up", {"2027-08-20": 300, "2027-08-21": None})})  # night closed
+    lines = history.describe_change(prev, cur, mode="improvements")
+    assert lines == [
+        "Studio (Breakfast): €260, 1 night opened",
+        "Two Bedroom Apartment (Breakfast): sold out → €465, 1 night opened",
+    ]
+    assert history.describe_change(prev, cur, mode="off") == []
