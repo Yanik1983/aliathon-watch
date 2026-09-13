@@ -8,11 +8,13 @@ from pathlib import Path
 from typing import Callable
 
 from watch import config, history as history_mod, notify, pagecrypt, state as state_mod
+from watch import settings as settings_mod
 from watch.client import FetchError, fetch_avl
 from watch.confirm import ConfirmedWindow, confirm
 from watch.finder import find_windows
 from watch.parser import Grid, ParseError, RoomRow, parse_grid
 from watch.render import render_page
+from watch.settings import Settings
 
 log = logging.getLogger("watch")
 
@@ -73,7 +75,13 @@ def _describe(e: dict) -> str:
 
 
 def _finish(
-    st: dict, grid: Grid | None, state_path, page_path, now: datetime, history: list[dict]
+    st: dict,
+    grid: Grid | None,
+    state_path,
+    page_path,
+    now: datetime,
+    history: list[dict],
+    settings: Settings,
 ) -> dict:
     st["last_checked"] = now.isoformat()
     state_mod.save(state_path, st)
@@ -82,7 +90,22 @@ def _finish(
         if config.NTFY_TOPIC and config.PAGE_PASSWORD
         else None
     )
-    page = render_page(grid, st["confirmed"], now, st["fail_count"], history, test_push=test_push)
+    settings_card = (
+        pagecrypt.encrypt(config.SETTINGS_TOKEN, config.PAGE_PASSWORD)
+        if config.SETTINGS_TOKEN and config.PAGE_PASSWORD and config.GITHUB_REPOSITORY
+        else None
+    )
+    page = render_page(
+        grid,
+        st["confirmed"],
+        now,
+        st["fail_count"],
+        history,
+        test_push=test_push,
+        settings=settings,
+        settings_card=settings_card,
+        repo=config.GITHUB_REPOSITORY,
+    )
     p = Path(page_path)
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(page, encoding="utf-8")
@@ -96,11 +119,17 @@ def run(
     page_path: str | Path = config.PAGE_PATH,
     now: datetime | None = None,
     history_path: str | Path | None = None,
+    settings_path: str | Path | None = None,
 ) -> dict:
     now = now or datetime.now(timezone.utc)
     history_path = history_path or config.HISTORY_PATH
     st = state_mod.load(state_path)
     history = history_mod.load(history_path)
+    settings = settings_mod.load(settings_path or config.SETTINGS_PATH)
+    log.info(
+        "settings: rooms=%s nights=%d-%d",
+        ",".join(settings.rooms), settings.min_nights, settings.max_nights,
+    )
 
     try:
         grid = parse_grid(fetch(config.FIRST_CHECKIN, config.TOTAL_NIGHTS))
@@ -114,7 +143,9 @@ def run(
                 priority="default",
                 tags="warning",
             )
-        return _finish(st, grid_from_json(st.get("grid")), state_path, page_path, now, history)
+        return _finish(
+            st, grid_from_json(st.get("grid")), state_path, page_path, now, history, settings
+        )
 
     st["fail_count"] = 0
     st["last_success"] = now.isoformat()
@@ -123,7 +154,7 @@ def run(
         history_mod.save(history_path, history)
         log.info("price history: change recorded (%d snapshots)", len(history))
         if len(history) >= 2:
-            lines = history_mod.describe_change(history[-2], history[-1])
+            lines = history_mod.describe_change(history[-2], history[-1], rooms=settings.rooms)
             if lines:
                 notifier(
                     "Aliathon: price change",
@@ -136,9 +167,9 @@ def run(
 
     candidates = find_windows(
         grid,
-        rooms=config.TARGET_ROOMS,
-        min_nights=config.MIN_NIGHTS,
-        max_nights=config.MAX_NIGHTS,
+        rooms=settings.rooms,
+        min_nights=settings.min_nights,
+        max_nights=settings.max_nights,
         first_checkin=config.FIRST_CHECKIN,
         last_checkout=config.LAST_CHECKOUT,
     )
@@ -168,7 +199,7 @@ def run(
         log.info("%d window(s) no longer available: %s", len(gone), ", ".join(gone))
 
     st["confirmed"] = confirmed_now
-    return _finish(st, grid, state_path, page_path, now, history)
+    return _finish(st, grid, state_path, page_path, now, history, settings)
 
 
 def main() -> int:

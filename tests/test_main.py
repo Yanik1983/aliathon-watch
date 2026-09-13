@@ -85,6 +85,7 @@ def paths(tmp_path):
 def _isolate_history(tmp_path, monkeypatch):
     """Never let tests touch the repo's real history.json."""
     monkeypatch.setattr(config, "HISTORY_PATH", str(tmp_path / "history.json"))
+    monkeypatch.setattr(config, "SETTINGS_PATH", str(tmp_path / "settings.json"))
 
 
 def test_fixture_run_no_notification_and_outputs_written(tmp_path):
@@ -253,7 +254,56 @@ def test_price_change_notifies(tmp_path):
     n = notifier.sent[0]
     assert n["title"] == "Aliathon: price change"
     assert n["priority"] == "default"
-    assert n["body"] == (
-        "One Bedroom Apartment (Rate 1): €300, 1 night opened\n"
-        "Studio (Rate 1): €300, 1 night closed"
+    # STD also changed but is not a watched room, so it is not mentioned.
+    assert n["body"] == "One Bedroom Apartment (Rate 1): €300, 1 night opened"
+
+
+def _write_settings(tmp_path, rooms, lo, hi):
+    (tmp_path / "settings.json").write_text(
+        json.dumps({"rooms": rooms, "min_nights": lo, "max_nights": hi}), encoding="utf-8"
     )
+
+
+def test_settings_change_rooms_and_nights(tmp_path):
+    sp, pp = paths(tmp_path)
+    _write_settings(tmp_path, ["STD"], 3, 3)
+    notifier = FakeNotifier()
+    fetch = FakeFetch({"STD": days(20, 22), "1BED": days(20, 27)})
+    st = run(fetch=fetch, notifier=notifier, state_path=sp, page_path=pp, now=NOW)
+    assert list(st["confirmed"]) == ["STD|2027-08-20|3"]
+    assert len(notifier.sent) == 1 and "Studio" in notifier.sent[0]["body"]
+
+
+def test_price_change_only_mentions_selected_rooms(tmp_path):
+    sp, pp = paths(tmp_path)
+    _write_settings(tmp_path, ["1BED"], 5, 8)
+    notifier = FakeNotifier()
+    before = {"1BED": days(20, 21), "STD": days(20, 22)}
+    run(fetch=FakeFetch(before), notifier=notifier, state_path=sp, page_path=pp, now=NOW)
+    after = {"1BED": days(20, 21), "STD": days(21, 22)}
+    run(fetch=FakeFetch(after), notifier=notifier, state_path=sp, page_path=pp, now=NOW + timedelta(minutes=10))
+    assert notifier.sent == []  # only STD changed
+    after2 = {"1BED": days(20, 22), "STD": days(21, 22)}
+    run(fetch=FakeFetch(after2), notifier=notifier, state_path=sp, page_path=pp, now=NOW + timedelta(minutes=20))
+    assert [n["body"] for n in notifier.sent] == ["One Bedroom Apartment (Rate 1): €300, 1 night opened"]
+
+
+def test_settings_card_rendered_when_token_password_repo_set(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "PAGE_PASSWORD", "pw")
+    monkeypatch.setattr(config, "SETTINGS_TOKEN", "github_pat_x")
+    monkeypatch.setattr(config, "GITHUB_REPOSITORY", "me/repo")
+    sp, pp = paths(tmp_path)
+    run(fetch=FakeFetch(), notifier=FakeNotifier(), state_path=sp, page_path=pp, now=NOW)
+    page = pp.read_text(encoding="utf-8")
+    assert 'id="settings"' in page
+    assert "github_pat_x" not in page
+    assert "me/repo" in page
+
+
+def test_settings_card_absent_without_token(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "PAGE_PASSWORD", "pw")
+    monkeypatch.setattr(config, "SETTINGS_TOKEN", "")
+    monkeypatch.setattr(config, "GITHUB_REPOSITORY", "me/repo")
+    sp, pp = paths(tmp_path)
+    run(fetch=FakeFetch(), notifier=FakeNotifier(), state_path=sp, page_path=pp, now=NOW)
+    assert 'id="settings"' not in pp.read_text(encoding="utf-8")
