@@ -163,3 +163,13 @@ def test_describe_change_new_room_appears():
     prev = _snap({})
     cur = _snap({"STD": _room("Studio", {"2027-08-20": 260})})
     assert history.describe_change(prev, cur) == ["Studio (Breakfast): new, €260"]
+
+
+def test_describe_change_filters_rooms():
+    prev = _snap({"1BED": _room("One Bedroom Apartment", {"2027-08-20": 295}),
+                  "STD": _room("Studio", {"2027-08-20": 260})})
+    cur = _snap({"1BED": _room("One Bedroom Apartment", {"2027-08-20": 310}),
+                 "STD": _room("Studio", {"2027-08-20": 270})})
+    assert history.describe_change(prev, cur, rooms=["1BED"]) == ["One Bedroom Apartment (Breakfast): €295 → €310"]
+    assert history.describe_change(prev, cur, rooms=["2B"]) == []
+    assert len(history.describe_change(prev, cur)) == 2

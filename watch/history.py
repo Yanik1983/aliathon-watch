@@ -5,6 +5,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Iterable
 
 from watch.parser import Grid
 
@@ -92,13 +93,17 @@ def _eur(price: int | None) -> str:
     return f"€{price}" if price is not None else "sold out"
 
 
-def describe_change(prev: dict, cur: dict) -> list[str]:
+def describe_change(prev: dict, cur: dict, rooms: Iterable[str] | None = None) -> list[str]:
     """Human lines for what differs between two snapshots, per room and package.
 
     Compares the lowest open-night price and counts nights that opened or closed.
+    ``rooms`` limits the output to those room codes; ``None`` means every room.
     """
+    wanted = set(rooms) if rooms is not None else None
     lines: list[str] = []
     for code, room in cur.get("rooms", {}).items():
+        if wanted is not None and code not in wanted:
+            continue
         name = room.get("name", code)
         old_room = prev.get("rooms", {}).get(code)
         old_rates = _room_rates(old_room) if old_room else {}
