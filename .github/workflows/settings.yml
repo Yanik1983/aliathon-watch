@@ -1,22 +1,18 @@
 name: settings
 
 # Dispatched by the "Notification settings" card on the status page (or manually
-# from the Actions tab). Validates the inputs, commits settings.json, and sends a
-# confirmation push. The poll loop rebases onto main before every poll, so the
-# change is live within 10 minutes without restarting it.
+# from the Actions tab). Validates the settings JSON, commits settings.json, runs
+# one poll so the page and any bookable-stay alert reflect the change right away,
+# and sends a confirmation push. The poll loop rebases onto main before every
+# poll, so it picks the file up as well without restarting.
 on:
   workflow_dispatch:
     inputs:
-      rooms:
-        description: "Comma-separated room codes, e.g. 1BED,S1BED"
-        required: true
-        type: string
-      min_nights:
-        description: "Minimum nights"
-        required: true
-        type: string
-      max_nights:
-        description: "Maximum nights"
+      settings:
+        description: >-
+          JSON object, e.g. {"rooms":["1BED","S1BED"],"min_nights":5,"max_nights":8,
+          "first_checkin":"2027-08-14","last_checkout":"2027-08-29","adults":2,
+          "children":2,"packages":[],"price_alerts":"all","max_price":null}
         required: true
         type: string
 
@@ -29,7 +25,7 @@ concurrency:
 jobs:
   save:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
@@ -42,18 +38,26 @@ jobs:
 
       - name: Validate and write settings.json
         env:
-          ROOMS: ${{ inputs.rooms }}
-          MIN_NIGHTS: ${{ inputs.min_nights }}
-          MAX_NIGHTS: ${{ inputs.max_nights }}
-        run: python -m watch.settings --rooms "$ROOMS" --min "$MIN_NIGHTS" --max "$MAX_NIGHTS"
+          SETTINGS: ${{ inputs.settings }}
+        run: python -m watch.settings --json "$SETTINGS"
+
+      - name: Poll once with the new settings
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_EMAIL: ${{ secrets.NTFY_EMAIL }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
+          SETTINGS_TOKEN: ${{ secrets.SETTINGS_TOKEN }}
+          NTFY_SERVER: ${{ vars.NTFY_SERVER }}
+        run: python -m watch.main || echo "poll exited non-zero"
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add settings.json
+          git add settings.json state.json history.json docs/index.html
           if git diff --cached --quiet; then
-            echo "settings unchanged"
+            echo "nothing changed"
             exit 0
           fi
           git commit -q -m "chore: settings $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
@@ -62,11 +66,11 @@ jobs:
               exit 0
             fi
             echo "push rejected (attempt $attempt); rebasing onto origin/main"
-            # During a rebase "ours" is the upstream side; "theirs" is the commit being
-            # replayed, i.e. this run's settings.json, which must win.
+            # During a rebase "theirs" is the commit being replayed, i.e. this run's
+            # files, which must win over a poll commit that landed meanwhile.
             git pull -q --rebase -X theirs origin main || { git rebase --abort; exit 1; }
           done
-          echo "could not push settings.json"
+          echo "could not push"
           exit 1
 
       - name: Confirmation push
@@ -78,10 +82,5 @@ jobs:
           python - <<'EOF'
           from watch import notify, settings
           s = settings.load("settings.json")
-          notify.send(
-              "Aliathon: settings updated",
-              f"Rooms: {', '.join(s.rooms)}\nStay: {s.min_nights}-{s.max_nights} nights",
-              priority="low",
-              tags="gear",
-          )
+          notify.send("Aliathon: settings updated", settings.describe(s), priority="low", tags="gear")
           EOF

@@ -46,6 +46,7 @@ jobs:
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
           SETTINGS_TOKEN: ${{ secrets.SETTINGS_TOKEN }}
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
           NTFY_SERVER: ${{ vars.NTFY_SERVER }}
         run: |
           git config user.name "github-actions[bot]"
@@ -69,6 +70,10 @@ jobs:
               fi
             fi
             python -m watch.main || echo "poll exited non-zero"
+            if [ -n "$HEALTHCHECK_URL" ]; then
+              # External dead-man switch (healthchecks.io or similar) alerts when pings stop.
+              curl -fsS -m 10 --retry 2 -o /dev/null "$HEALTHCHECK_URL" || echo "healthcheck ping failed"
+            fi
             git add state.json history.json docs/index.html
             if git diff --cached --quiet; then
               echo "no changes"
