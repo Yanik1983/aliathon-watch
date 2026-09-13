@@ -68,8 +68,11 @@ If three polls fail in a row, one warning notification is sent.
      Fine-grained tokens): repository access = only this repository,
      repository permission Actions = Read and write, nothing else. That
      permission can only start workflows; it cannot push code or read
-     secrets. Set it with `gh secret set SETTINGS_TOKEN`. It is embedded in
-     the page encrypted with `PAGE_PASSWORD`, like the topic.
+     secrets. Set it with `gh secret set SETTINGS_TOKEN`, or run
+     `bash scripts/settings-token-wizard.sh`, which walks through creating
+     the token, stores the secret, restarts the poll job and waits for the
+     card to appear. It is embedded in the page encrypted with
+     `PAGE_PASSWORD`, like the topic.
    - optional repository variable `NTFY_SERVER` for a self-hosted ntfy
 3. GitHub Pages: Settings > Pages > Source: Deploy from a branch, branch
    `main`, folder `/docs`.
