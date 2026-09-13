@@ -9,6 +9,8 @@ from zoneinfo import ZoneInfo
 from watch import config
 from watch import history as history_mod
 from watch.parser import Grid
+from watch import settings as settings_mod
+from watch.settings import Settings
 
 CYPRUS = ZoneInfo("Europe/Nicosia")
 
@@ -58,15 +60,22 @@ h3 { font-size:1rem; margin:16px 0 6px; }
                           border:1px solid var(--line); border-radius:50%; background:var(--card); color:var(--fg);
                           font:20px/1 system-ui,sans-serif; cursor:pointer; }
 #chart-box.fs .rate-btns { padding-right:44px; margin-top:0; }
-#testpush form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-#testpush input { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
+.gated form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.gated input[type=password] { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
                   color:var(--fg); font:inherit; min-width:180px; }
-#testpush button { padding:6px 12px; border:0; border-radius:6px; background:var(--accent); color:#fff;
+.gated input[type=number] { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--bg);
+                  color:var(--fg); font:inherit; width:70px; }
+.gated button { padding:6px 12px; border:0; border-radius:6px; background:var(--accent); color:#fff;
                    font:inherit; font-weight:600; cursor:pointer; }
-#testpush button:disabled { opacity:.6; cursor:wait; }
-#testpush .msg { margin:8px 0 0; }
-#testpush .msg.err { color:#d9534f; }
-#testpush .msg.ok { color:#2e9e4f; }
+.gated button:disabled { opacity:.6; cursor:wait; }
+.gated .msg { margin:8px 0 0; }
+.gated .msg.err { color:#d9534f; }
+.gated .msg.ok { color:#2e9e4f; }
+#settings form { display:block; }
+#settings fieldset { border:1px solid var(--line); border-radius:8px; padding:8px 12px; margin:0 0 10px; }
+#settings legend { padding:0 4px; color:var(--muted); }
+#settings fieldset label { display:inline-block; margin:2px 14px 2px 0; }
+#settings .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:10px; }
 """
 
 
@@ -84,12 +93,30 @@ def _fmt_day(d: date) -> str:
     return d.strftime("%a %d %b")
 
 
-def _windows_section(confirmed: dict) -> str:
+def _room_names(settings: Settings, grid: Grid | None) -> list[str]:
+    rooms = grid.rooms if grid else {}
+    return [rooms[c].name if c in rooms else c for c in settings.rooms]
+
+
+def _watch_text(settings: Settings, grid: Grid | None) -> str:
+    names = [htmllib.escape(n) for n in _room_names(settings, grid)]
+    joined = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " or " + names[-1]
+    nights = (
+        f"{settings.min_nights} nights"
+        if settings.min_nights == settings.max_nights
+        else f"{settings.min_nights}–{settings.max_nights} nights"
+    )
+    return (
+        f"Watching for {nights} in {joined}, check-in from {_fmt_day(config.FIRST_CHECKIN)}, "
+        f"check-out by {_fmt_day(config.LAST_CHECKOUT)}."
+    )
+
+
+def _windows_section(confirmed: dict, settings: Settings, grid: Grid | None) -> str:
     if not confirmed:
         return (
             '<section class="card none"><h2>No bookable stays right now</h2>'
-            "<p>Watching for 5–8 nights in a One Bedroom or Superior One Bedroom "
-            "Apartment, check-in from Sat 14 Aug 2027, check-out by Sun 29 Aug 2027.</p></section>"
+            f"<p>{_watch_text(settings, grid)}</p></section>"
         )
     items = []
     for entry in sorted(confirmed.values(), key=lambda e: (e["checkin"], e["nights"], e["room"])):
@@ -114,14 +141,14 @@ def _windows_section(confirmed: dict) -> str:
     )
 
 
-def _grid_section(grid: Grid | None) -> str:
+def _grid_section(grid: Grid | None, settings: Settings) -> str:
     if grid is None:
         return '<section class="card"><p>No data yet — first poll has not completed.</p></section>'
     head = "".join(
         f"<th><span>{d.strftime('%a')}</span><br>{d.strftime('%b %d')}</th>" for d in grid.dates
     )
-    ordered = [c for c in config.TARGET_ROOMS if c in grid.rooms] + [
-        c for c in grid.rooms if c not in config.TARGET_ROOMS
+    ordered = [c for c in settings.rooms if c in grid.rooms] + [
+        c for c in grid.rooms if c not in settings.rooms
     ]
     rows = []
     for code in ordered:
@@ -135,7 +162,7 @@ def _grid_section(grid: Grid | None) -> str:
                 cells.append(
                     f'<td class="open" data-room="{code}" data-date="{d.isoformat()}">€{price}</td>'
                 )
-        cls = ' class="target"' if code in config.TARGET_ROOMS else ""
+        cls = ' class="target"' if code in settings.rooms else ""
         rows.append(
             f'<tr{cls}><td class="room">{htmllib.escape(row.name)}</td>{"".join(cells)}</tr>'
         )
@@ -160,7 +187,7 @@ def _short_rate(rate: str) -> str:
     return rate.split("|")[-1].strip() if "|" in rate else rate
 
 
-def _history_section(history: list[dict], now: datetime) -> str:
+def _history_section(history: list[dict], now: datetime, settings: Settings) -> str:
     series = history_mod.series(history)
     if now.tzinfo is None:
         now = now.replace(tzinfo=timezone.utc)
@@ -171,8 +198,8 @@ def _history_section(history: list[dict], now: datetime) -> str:
             "<p>No history yet. A point is recorded every time a price or availability changes.</p></section>"
         )
     rates = history_mod.rate_names(history)
-    ordered = [c for c in config.TARGET_ROOMS if c in series] + [
-        c for c in series if c not in config.TARGET_ROOMS
+    ordered = [c for c in settings.rooms if c in series] + [
+        c for c in series if c not in settings.rooms
     ]
     datasets = []
     for i, code in enumerate(ordered):
@@ -190,7 +217,7 @@ def _history_section(history: list[dict], now: datetime) -> str:
                     + [{"x": now_iso, "y": pts[-1][1]}],
                     "borderColor": _PALETTE[i % len(_PALETTE)],
                     "backgroundColor": _PALETTE[i % len(_PALETTE)],
-                    "borderWidth": 3 if code in config.TARGET_ROOMS else 1.5,
+                    "borderWidth": 3 if code in settings.rooms else 1.5,
                     # Colour = room, line style = package.
                     "borderDash": _DASHES[rates.index(rate) % len(_DASHES)],
                     "pointRadius": [3] * len(pts) + [0],
@@ -311,12 +338,32 @@ def _history_section(history: list[dict], now: datetime) -> str:
 </section>"""
 
 
+_DECRYPT_JS = """<script>
+// Shared by the password-gated cards: PBKDF2-HMAC-SHA256 -> AES-256-GCM, mirrors watch/pagecrypt.py.
+window.aliathonDecrypt = function(blob, password){
+  function b64(s){ var bin = atob(s), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
+  var enc = new TextEncoder();
+  return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
+    .then(function(base){ return crypto.subtle.deriveKey(
+      {name: 'PBKDF2', salt: b64(blob.salt), iterations: blob.iter, hash: 'SHA-256'},
+      base, {name: 'AES-GCM', length: 256}, false, ['decrypt']); })
+    .then(function(key){ return crypto.subtle.decrypt({name: 'AES-GCM', iv: b64(blob.iv)}, key, b64(blob.ct)); })
+    .then(function(buf){ return new TextDecoder().decode(buf); });
+};
+</script>
+"""
+
+
+def _json_payload(blob: dict) -> str:
+    return json.dumps(blob).replace("</", "<\\/")
+
+
 def _test_push_section(blob: dict | None) -> str:
     if not blob:
         return ""
-    payload = json.dumps(blob).replace("</", "<\\/")
+    payload = _json_payload(blob)
     server = htmllib.escape(config.NTFY_SERVER)
-    return f"""<section class="card" id="testpush"><h2>Test notification</h2>
+    return f"""<section class="card gated" id="testpush"><h2>Test notification</h2>
 <p class="sub">Sends a test push to the phone through the same ntfy topic the watcher uses. The topic is stored
 here encrypted; the password decrypts it in your browser only.</p>
 <form autocomplete="off">
@@ -332,17 +379,7 @@ here encrypted; the password decrypts it in your browser only.</p>
       remember = document.getElementById('tp-remember'), btn = document.getElementById('tp-send'),
       msg = document.getElementById('tp-msg'), KEY = 'aliathon-ntfy-topic';
   function say(text, cls){{ msg.textContent = text; msg.className = 'msg ' + (cls || ''); }}
-  function b64(s){{ var bin = atob(s), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }}
   function saved(){{ try {{ return localStorage.getItem(KEY) || ''; }} catch (e) {{ return ''; }} }}
-  function decryptTopic(password){{
-    var enc = new TextEncoder();
-    return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey'])
-      .then(function(base){{ return crypto.subtle.deriveKey(
-        {{name: 'PBKDF2', salt: b64(blob.salt), iterations: blob.iter, hash: 'SHA-256'}},
-        base, {{name: 'AES-GCM', length: 256}}, false, ['decrypt']); }})
-      .then(function(key){{ return crypto.subtle.decrypt({{name: 'AES-GCM', iv: b64(blob.iv)}}, key, b64(blob.ct)); }})
-      .then(function(buf){{ return new TextDecoder().decode(buf); }});
-  }}
   function sendTest(topic){{
     var now = new Date();
     return fetch(server + '/' + topic, {{method: 'POST',
@@ -354,12 +391,94 @@ here encrypted; the password decrypts it in your browser only.</p>
   form.addEventListener('submit', function(ev){{
     ev.preventDefault();
     btn.disabled = true; say('Working…');
-    var topicP = (!pw.value && saved()) ? Promise.resolve(saved()) : decryptTopic(pw.value);
+    var topicP = (!pw.value && saved()) ? Promise.resolve(saved()) : aliathonDecrypt(blob, pw.value);
     topicP.then(function(topic){{
       try {{ if (remember.checked) localStorage.setItem(KEY, topic); else localStorage.removeItem(KEY); }} catch (e) {{}}
       return sendTest(topic);
     }}).then(function(resp){{
       if (resp.ok) say('Sent. Check the phone.', 'ok'); else say('ntfy returned ' + resp.status, 'err');
+    }}).catch(function(e){{
+      var wrong = e && (e.name === 'OperationError' || /decrypt/i.test(String(e)));
+      say(wrong ? 'Wrong password.' : 'Failed: ' + (e && e.message || e), 'err');
+      if (wrong) {{ try {{ localStorage.removeItem(KEY); }} catch (x) {{}} }}
+    }}).then(function(){{ btn.disabled = false; pw.value = ''; }});
+  }});
+}})();
+</script>
+</section>"""
+
+
+def _settings_section(grid: Grid | None, settings: Settings, blob: dict | None, repo: str) -> str:
+    if not blob or not repo:
+        return ""
+    payload = _json_payload(blob)
+    url = htmllib.escape(
+        f"https://api.github.com/repos/{repo}/actions/workflows/settings.yml/dispatches"
+    )
+    rooms = dict(grid.rooms) if grid else {}
+    codes = [c for c in settings.rooms if c in rooms] + [c for c in rooms if c not in settings.rooms]
+    codes += [c for c in settings.rooms if c not in rooms]
+    boxes = "".join(
+        '<label><input type="checkbox" name="room" value="{code}"{chk}> {name}</label>'.format(
+            code=htmllib.escape(code),
+            chk=" checked" if code in settings.rooms else "",
+            name=htmllib.escape(rooms[code].name if code in rooms else code),
+        )
+        for code in codes
+    )
+    total = config.TOTAL_NIGHTS
+    return f"""<section class="card gated" id="settings"><h2>Notification settings</h2>
+<p class="sub">Which rooms to watch and how long a stay must be. Applies to bookable-stay alerts and to
+price-change pushes. Saving starts a GitHub workflow; the watcher picks the change up within 10 minutes.</p>
+<form autocomplete="off">
+<fieldset><legend>Rooms</legend>{boxes}</fieldset>
+<div class="row"><label>Nights: min <input type="number" id="st-min" min="1" max="{total}" value="{settings.min_nights}"></label>
+<label>max <input type="number" id="st-max" min="1" max="{total}" value="{settings.max_nights}"></label></div>
+<div class="row">
+<input type="password" id="st-pw" placeholder="Password" autocomplete="current-password">
+<label><input type="checkbox" id="st-remember"> remember on this device</label>
+<button type="submit" id="st-save">Save</button>
+</div>
+</form>
+<p class="msg" id="st-msg"></p>
+<script>
+(function(){{
+  var blob = {payload}, url = "{url}", TOTAL = {total};
+  var form = document.querySelector('#settings form'), pw = document.getElementById('st-pw'),
+      remember = document.getElementById('st-remember'), btn = document.getElementById('st-save'),
+      msg = document.getElementById('st-msg'), minEl = document.getElementById('st-min'),
+      maxEl = document.getElementById('st-max'), KEY = 'aliathon-settings-token';
+  function say(text, cls){{ msg.textContent = text; msg.className = 'msg ' + (cls || ''); }}
+  function saved(){{ try {{ return localStorage.getItem(KEY) || ''; }} catch (e) {{ return ''; }} }}
+  function chosen(){{ return Array.prototype.map.call(form.querySelectorAll('input[name=room]:checked'), function(el){{ return el.value; }}); }}
+  function check(){{
+    var lo = parseInt(minEl.value, 10), hi = parseInt(maxEl.value, 10);
+    if (!chosen().length) return 'Select at least one room.';
+    if (!(lo >= 1 && hi <= TOTAL && lo <= hi)) return 'Nights must satisfy 1 \\u2264 min \\u2264 max \\u2264 ' + TOTAL + '.';
+    return '';
+  }}
+  function dispatch(token){{
+    return fetch(url, {{method: 'POST',
+      headers: {{'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json'}},
+      body: JSON.stringify({{ref: 'main', inputs: {{rooms: chosen().join(','),
+        min_nights: String(parseInt(minEl.value, 10)), max_nights: String(parseInt(maxEl.value, 10))}}}})}});
+  }}
+  if (saved()) {{ pw.placeholder = 'Password (remembered)'; remember.checked = true; }}
+  if (!(window.crypto && crypto.subtle)) {{ say('This browser cannot decrypt here (needs https).', 'err'); btn.disabled = true; }}
+  form.addEventListener('submit', function(ev){{
+    ev.preventDefault();
+    var problem = check();
+    if (problem) {{ say(problem, 'err'); return; }}
+    btn.disabled = true; say('Working…');
+    var tokenP = (!pw.value && saved()) ? Promise.resolve(saved()) : aliathonDecrypt(blob, pw.value);
+    tokenP.then(function(token){{
+      try {{ if (remember.checked) localStorage.setItem(KEY, token); else localStorage.removeItem(KEY); }} catch (e) {{}}
+      return dispatch(token);
+    }}).then(function(resp){{
+      if (resp.status === 204) {{ say('Saved. The watcher picks it up within 10 minutes.', 'ok'); return; }}
+      if (resp.status === 401) {{ try {{ localStorage.removeItem(KEY); }} catch (x) {{}} }}
+      return resp.text().then(function(t){{ say('GitHub returned ' + resp.status + ': ' + t.slice(0, 200), 'err'); }});
     }}).catch(function(e){{
       var wrong = e && (e.name === 'OperationError' || /decrypt/i.test(String(e)));
       say(wrong ? 'Wrong password.' : 'Failed: ' + (e && e.message || e), 'err');
@@ -378,7 +497,11 @@ def render_page(
     fail_count: int,
     history: list[dict] | None = None,
     test_push: dict | None = None,
+    settings: Settings | None = None,
+    settings_card: dict | None = None,
+    repo: str = "",
 ) -> str:
+    settings = settings or settings_mod.defaults()
     utc, cy = _fmt_dt(checked_at)
     epoch = int(checked_at.timestamp() * 1000) if checked_at else 0
     fail_html = ""
@@ -402,9 +525,11 @@ def render_page(
 <p class="sub">Last checked <strong>{cy}</strong> <span id="ago" data-checked="{epoch}"></span><br>({utc}). Polls every 10 minutes.
 <a href="{config.BASE_URL}/" target="_blank" rel="noopener">Booking site</a> · <a href="#history">Price history</a></p>
 {fail_html}
-{_windows_section(confirmed)}
-{_grid_section(grid)}
-{_history_section(history or [], checked_at or datetime.now(timezone.utc))}
+{_windows_section(confirmed, settings, grid)}
+{_grid_section(grid, settings)}
+{_history_section(history or [], checked_at or datetime.now(timezone.utc), settings)}
+{_DECRYPT_JS if (test_push or settings_card) else ""}
+{_settings_section(grid, settings, settings_card, repo)}
 {_test_push_section(test_push)}
 <script>
 (function(){{

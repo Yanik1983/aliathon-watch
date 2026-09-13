@@ -164,3 +164,33 @@ def test_history_series_extended_to_checked_time():
     # x axis pinned to the recorded span, not auto-stretched around a lone point
     assert "xMin = Date.parse('2026-09-10T20:00:00+00:00')" in page
     assert "xMax = Date.parse('2026-09-12T08:00:00+00:00')" in page
+
+
+def test_page_text_and_highlight_follow_settings():
+    from watch.settings import Settings
+
+    page = render_page(GRID, {}, NOW, 0, settings=Settings(("STD",), 3, 4))
+    assert "Watching for 3–4 nights in Studio" in page
+    assert re.search(r'<tr class="target"><td class="room">Studio</td>', page)
+    assert page.index("Studio") < page.index("One Bedroom Apartment")
+
+
+def test_settings_card_lists_grid_rooms_with_checked_state():
+    from watch.settings import Settings
+
+    blob = {"salt": "a", "iv": "b", "ct": "c", "iter": 1}
+    page = render_page(
+        GRID, {}, NOW, 0, settings=Settings(("1BED", "ZZZ"), 5, 8), settings_card=blob, repo="me/repo"
+    )
+    assert 'id="settings"' in page
+    assert re.search(r'name="room" value="1BED" checked', page)
+    assert re.search(r'name="room" value="STD"(?! checked)', page)
+    assert re.search(r'name="room" value="ZZZ" checked', page)  # selected but not in grid
+    assert 'id="st-min" min="1" max="15" value="5"' in page
+    assert 'id="st-max" min="1" max="15" value="8"' in page
+    assert "api.github.com/repos/me/repo/actions/workflows/settings.yml/dispatches" in page
+    assert page.count("window.aliathonDecrypt = ") == 1
+
+
+def test_no_settings_card_without_blob():
+    assert 'id="settings"' not in render_page(GRID, {}, NOW, 0)
