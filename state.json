@@ -1,15 +1,5 @@
 {
-  "confirmed": {
-    "2BSU|2027-08-14|5": {
-      "checkin": "2027-08-14",
-      "first_seen": "2026-09-13T10:19:44.826795+00:00",
-      "nights": 5,
-      "price": 2725,
-      "room": "2BSU",
-      "room_name": "Two Bedroom Suite",
-      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=5&rooms=1&adults=2&children=2&infants=0"
-    }
-  },
+  "confirmed": {},
   "fail_count": 0,
   "grid": {
     "dates": [
@@ -158,6 +148,6 @@
       }
     }
   },
-  "last_checked": "2026-09-13T10:19:44.826795+00:00",
-  "last_success": "2026-09-13T10:19:44.826795+00:00"
+  "last_checked": "2026-09-13T10:29:47.954852+00:00",
+  "last_success": "2026-09-13T10:29:47.954852+00:00"
 }
