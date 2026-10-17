@@ -342,6 +342,348 @@
       "room_name": "One Bedroom Apartment",
       "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-24&nights=5&rooms=1&adults=2&children=2&infants=0"
     },
+    "1BSU|2027-08-14|5": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-14|6": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-14|7": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-14|8": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-15|5": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-15|6": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-15|7": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-15|8": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-16|5": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-16|6": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-16|7": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-16|8": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-17|5": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-17|6": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-17|7": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-17|8": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-18|5": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-18|6": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-18|7": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-18|8": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-19|5": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-19|6": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-19|7": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-19|8": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-20|5": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-20|6": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-20|7": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-20|8": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-21|5": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-21|6": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-21|7": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-21|8": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2720,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-22|5": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-22|6": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-22|7": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-23|5": {
+      "checkin": "2027-08-23",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-23&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-23|6": {
+      "checkin": "2027-08-23",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-23&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "1BSU|2027-08-24|5": {
+      "checkin": "2027-08-24",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2380,
+      "room": "1BSU",
+      "room_name": "One Bedroom Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-24&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
     "S1BED|2027-08-14|5": {
       "checkin": "2027-08-14",
       "first_seen": "2026-10-17T11:32:02.016426+00:00",
@@ -441,11 +783,20 @@
       "room_name": "Superior One Bedroom Apartment",
       "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=7&rooms=1&adults=2&children=2&infants=0"
     },
+    "S1BED|2027-08-16|8": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2440,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
     "S1BED|2027-08-17|5": {
       "checkin": "2027-08-17",
       "first_seen": "2026-10-17T11:32:02.016426+00:00",
       "nights": 5,
-      "price": 1830,
+      "price": 2135,
       "room": "S1BED",
       "room_name": "Superior One Bedroom Apartment",
       "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=5&rooms=1&adults=2&children=2&infants=0"
@@ -454,19 +805,568 @@
       "checkin": "2027-08-17",
       "first_seen": "2026-10-17T11:32:02.016426+00:00",
       "nights": 6,
-      "price": 1830,
+      "price": 2135,
       "room": "S1BED",
       "room_name": "Superior One Bedroom Apartment",
       "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-17|7": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-17|8": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2440,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=8&rooms=1&adults=2&children=2&infants=0"
     },
     "S1BED|2027-08-18|5": {
       "checkin": "2027-08-18",
       "first_seen": "2026-10-17T11:32:02.016426+00:00",
       "nights": 5,
-      "price": 1525,
+      "price": 2135,
       "room": "S1BED",
       "room_name": "Superior One Bedroom Apartment",
       "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-18|6": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-18|7": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-18|8": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2440,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-19|5": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-19|6": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-19|7": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-19|8": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2440,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-20|5": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-20|6": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-20|7": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-20|8": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2440,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-21|5": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-21|6": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-21|7": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-21|8": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2440,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-22|5": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-22|6": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-22|7": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-23|5": {
+      "checkin": "2027-08-23",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-23&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-23|6": {
+      "checkin": "2027-08-23",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-23&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "S1BED|2027-08-24|5": {
+      "checkin": "2027-08-24",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2135,
+      "room": "S1BED",
+      "room_name": "Superior One Bedroom Apartment",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-24&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-14|5": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-14|6": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-14|7": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-14|8": {
+      "checkin": "2027-08-14",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-15|5": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-15|6": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-15|7": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-15|8": {
+      "checkin": "2027-08-15",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-16|5": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-16|6": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-16|7": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-16|8": {
+      "checkin": "2027-08-16",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-16&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-17|5": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-17|6": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-17|7": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-17|8": {
+      "checkin": "2027-08-17",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-17&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-18|5": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-18|6": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-18|7": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-18|8": {
+      "checkin": "2027-08-18",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-18&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-19|5": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-19|6": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-19|7": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-19|8": {
+      "checkin": "2027-08-19",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-19&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-20|5": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-20|6": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-20|7": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-20|8": {
+      "checkin": "2027-08-20",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-20&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-21|5": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-21|6": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-21|7": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-21|8": {
+      "checkin": "2027-08-21",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 8,
+      "price": 2960,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-21&nights=8&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-22|5": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-22|6": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-22|7": {
+      "checkin": "2027-08-22",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 7,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-22&nights=7&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-23|5": {
+      "checkin": "2027-08-23",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-23&nights=5&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-23|6": {
+      "checkin": "2027-08-23",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 6,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-23&nights=6&rooms=1&adults=2&children=2&infants=0"
+    },
+    "SW1B|2027-08-24|5": {
+      "checkin": "2027-08-24",
+      "first_seen": "2026-10-17T11:42:15.810227+00:00",
+      "nights": 5,
+      "price": 2590,
+      "room": "SW1B",
+      "room_name": "One Bedroom Swim-Up Suite",
+      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-24&nights=5&rooms=1&adults=2&children=2&infants=0"
     }
   },
   "fail_count": 0,
@@ -513,65 +1413,65 @@
       "1BSU": {
         "name": "One Bedroom Suite",
         "nights": {
-          "2027-08-14": null,
-          "2027-08-15": null,
-          "2027-08-16": null,
-          "2027-08-17": null,
-          "2027-08-18": null,
+          "2027-08-14": 340,
+          "2027-08-15": 340,
+          "2027-08-16": 340,
+          "2027-08-17": 340,
+          "2027-08-18": 340,
           "2027-08-19": 340,
           "2027-08-20": 340,
-          "2027-08-21": null,
-          "2027-08-22": null,
-          "2027-08-23": null,
-          "2027-08-24": null,
-          "2027-08-25": null,
-          "2027-08-26": null,
+          "2027-08-21": 340,
+          "2027-08-22": 340,
+          "2027-08-23": 340,
+          "2027-08-24": 340,
+          "2027-08-25": 340,
+          "2027-08-26": 340,
           "2027-08-27": 340,
           "2027-08-28": 340
         },
-        "status": "NA"
+        "status": "AVL"
       },
       "2B": {
         "name": "Two Bedroom Apartment",
         "nights": {
           "2027-08-14": 465,
-          "2027-08-15": null,
-          "2027-08-16": null,
-          "2027-08-17": null,
-          "2027-08-18": null,
-          "2027-08-19": null,
-          "2027-08-20": null,
-          "2027-08-21": null,
-          "2027-08-22": null,
-          "2027-08-23": null,
-          "2027-08-24": null,
-          "2027-08-25": null,
-          "2027-08-26": null,
-          "2027-08-27": null,
-          "2027-08-28": null
+          "2027-08-15": 465,
+          "2027-08-16": 465,
+          "2027-08-17": 465,
+          "2027-08-18": 465,
+          "2027-08-19": 465,
+          "2027-08-20": 465,
+          "2027-08-21": 465,
+          "2027-08-22": 465,
+          "2027-08-23": 465,
+          "2027-08-24": 465,
+          "2027-08-25": 465,
+          "2027-08-26": 465,
+          "2027-08-27": 465,
+          "2027-08-28": 465
         },
-        "status": "NA"
+        "status": "AVL"
       },
       "2BSU": {
         "name": "Two Bedroom Suite",
         "nights": {
-          "2027-08-14": null,
-          "2027-08-15": null,
-          "2027-08-16": null,
+          "2027-08-14": 545,
+          "2027-08-15": 545,
+          "2027-08-16": 545,
           "2027-08-17": 545,
           "2027-08-18": 545,
-          "2027-08-19": null,
-          "2027-08-20": null,
-          "2027-08-21": null,
-          "2027-08-22": null,
-          "2027-08-23": null,
-          "2027-08-24": null,
-          "2027-08-25": null,
-          "2027-08-26": null,
-          "2027-08-27": null,
-          "2027-08-28": null
+          "2027-08-19": 545,
+          "2027-08-20": 545,
+          "2027-08-21": 545,
+          "2027-08-22": 545,
+          "2027-08-23": 545,
+          "2027-08-24": 545,
+          "2027-08-25": 545,
+          "2027-08-26": 545,
+          "2027-08-27": 545,
+          "2027-08-28": 545
         },
-        "status": "NA"
+        "status": "AVL"
       },
       "S1BED": {
         "name": "Superior One Bedroom Apartment",
@@ -585,38 +1485,38 @@
           "2027-08-20": 305,
           "2027-08-21": 305,
           "2027-08-22": 305,
-          "2027-08-23": null,
-          "2027-08-24": null,
-          "2027-08-25": null,
-          "2027-08-26": null,
+          "2027-08-23": 305,
+          "2027-08-24": 305,
+          "2027-08-25": 305,
+          "2027-08-26": 305,
           "2027-08-27": 305,
           "2027-08-28": 305
         },
-        "status": "NA"
+        "status": "AVL"
       },
       "SW1B": {
         "name": "One Bedroom Swim-Up Suite",
         "nights": {
-          "2027-08-14": null,
-          "2027-08-15": null,
-          "2027-08-16": null,
-          "2027-08-17": null,
-          "2027-08-18": null,
-          "2027-08-19": null,
-          "2027-08-20": null,
-          "2027-08-21": null,
-          "2027-08-22": null,
-          "2027-08-23": null,
-          "2027-08-24": null,
-          "2027-08-25": null,
-          "2027-08-26": null,
-          "2027-08-27": null,
-          "2027-08-28": null
+          "2027-08-14": 370,
+          "2027-08-15": 370,
+          "2027-08-16": 370,
+          "2027-08-17": 370,
+          "2027-08-18": 370,
+          "2027-08-19": 370,
+          "2027-08-20": 370,
+          "2027-08-21": 370,
+          "2027-08-22": 370,
+          "2027-08-23": 370,
+          "2027-08-24": 370,
+          "2027-08-25": 370,
+          "2027-08-26": 370,
+          "2027-08-27": 370,
+          "2027-08-28": 370
         },
-        "status": "NA"
+        "status": "AVL"
       }
     }
   },
-  "last_checked": "2026-10-17T11:32:02.016426+00:00",
-  "last_success": "2026-10-17T11:32:02.016426+00:00"
+  "last_checked": "2026-10-17T11:42:15.810227+00:00",
+  "last_success": "2026-10-17T11:42:15.810227+00:00"
 }
