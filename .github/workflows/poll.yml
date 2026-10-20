@@ -1,11 +1,12 @@
 name: poll
 
-# One long-running job polls every 10 minutes for ~5h50m. A new job starts
-# every 3 hours (or on a code push) and cancels the previous one, so polling is
-# continuous even when GitHub delays scheduled runs.
+# One short job per run: poll, commit the result. Runs hourly. (It used to be a
+# ~6h loop polling every 10 minutes, which kept a runner busy 24/7 and burned
+# the Actions minutes. For a faster cadence change the cron, e.g. "7,37 * * * *"
+# for every 30 minutes; each run costs about one billable minute.)
 on:
   schedule:
-    - cron: "7 */3 * * *"
+    - cron: "7 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -19,16 +20,12 @@ permissions:
 
 concurrency:
   group: poll
-  cancel-in-progress: true
-
-env:
-  LOOP_MINUTES: 350
-  INTERVAL_SECONDS: 600
+  cancel-in-progress: false
 
 jobs:
   poll:
     runs-on: ubuntu-latest
-    timeout-minutes: 358
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -39,53 +36,35 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Poll loop
+      - name: Poll
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           NTFY_EMAIL: ${{ secrets.NTFY_EMAIL }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
           SETTINGS_TOKEN: ${{ secrets.SETTINGS_TOKEN }}
-          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
           NTFY_SERVER: ${{ vars.NTFY_SERVER }}
+        run: python -m watch.main || echo "poll exited non-zero"
+
+      - name: Healthcheck ping
+        env:
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+        run: |
+          if [ -n "$HEALTHCHECK_URL" ]; then
+            curl -fsS -m 10 --retry 2 -o /dev/null "$HEALTHCHECK_URL" || echo "healthcheck ping failed"
+          fi
+
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          end=$(( $(date +%s) + LOOP_MINUTES * 60 ))
-          n=0
-          while [ "$(date +%s)" -lt "$end" ]; do
-            n=$((n + 1))
-            echo "::group::poll #$n $(date -u +'%Y-%m-%d %H:%M UTC')"
-            # Pick up settings.json (written by the settings workflow) and anything
-            # else that landed upstream since the last iteration, before polling.
-            git fetch -q origin main
-            if [ "$(git rev-list --count HEAD..origin/main)" -gt 0 ]; then
-              # Generated files always win over whatever landed upstream meanwhile.
-              local_head=$(git rev-parse HEAD)
-              if ! git pull -q --rebase -X theirs origin main; then
-                git rebase --abort || true
-                git reset -q --hard origin/main
-                git checkout "$local_head" -- state.json history.json docs/index.html
-                git commit -q -m "chore: poll $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]" || true
-              fi
-            fi
-            python -m watch.main || echo "poll exited non-zero"
-            if [ -n "$HEALTHCHECK_URL" ]; then
-              # External dead-man switch (healthchecks.io or similar) alerts when pings stop.
-              curl -fsS -m 10 --retry 2 -o /dev/null "$HEALTHCHECK_URL" || echo "healthcheck ping failed"
-            fi
-            git add state.json history.json docs/index.html
-            if git diff --cached --quiet; then
-              echo "no changes"
-            else
-              git commit -q -m "chore: poll $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
-            fi
-            if [ "$(git rev-list --count origin/main..HEAD)" -gt 0 ]; then
-              git push -q origin HEAD:main || echo "push failed; will retry next iteration"
-            fi
-            echo "::endgroup::"
-            remaining=$(( end - $(date +%s) ))
-            [ "$remaining" -le "$INTERVAL_SECONDS" ] && break
-            sleep "$INTERVAL_SECONDS"
-          done
-          echo "loop finished after $n poll(s)"
+          git add state.json history.json docs/index.html
+          if git diff --cached --quiet; then
+            echo "no changes"
+            exit 0
+          fi
+          git commit -q -m "chore: poll $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
+          git push -q origin HEAD:main || {
+            git pull -q --rebase -X theirs origin main
+            git push -q origin HEAD:main
+          }

@@ -1,13 +1,13 @@
 name: watchdog
 
 # Independent of the poll job: if state.json in the repo shows no poll attempt
-# for 30 minutes, send one high-priority push. GitHub may delay cron runs by
+# for too long, send one high-priority push. GitHub may delay cron runs by
 # an hour or more, so this is a safety net, not a precise timer. For a monitor
 # that also survives a GitHub-wide outage, set the HEALTHCHECK_URL secret (see
 # README) so every poll pings an external service.
 on:
   schedule:
-    - cron: "23 * * * *"
+    - cron: "23 */6 * * *"
   workflow_dispatch:
 
 permissions:
