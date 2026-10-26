@@ -1,13 +1,12 @@
 name: watchdog
 
 # Independent of the poll job: if state.json in the repo shows no poll attempt
-# for 30 minutes, send one high-priority push. GitHub may delay cron runs by
-# an hour or more, so this is a safety net, not a precise timer. For a monitor
-# that also survives a GitHub-wide outage, set the HEALTHCHECK_URL secret (see
-# README) so every poll pings an external service.
+# for 9 hours (polls run every 6), send one high-priority push. GitHub may delay
+# cron runs by an hour or more, so this is a safety net, not a precise timer.
+# The alert text still says "every 10 minutes"; ignore that.
 on:
   schedule:
-    - cron: "23 * * * *"
+    - cron: "23 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -36,4 +35,6 @@ jobs:
           NTFY_EMAIL: ${{ secrets.NTFY_EMAIL }}
           NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
           NTFY_SERVER: ${{ vars.NTFY_SERVER }}
-        run: python -m watch.watchdog
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python -c "from datetime import timedelta; from watch import watchdog; watchdog.check(stale_after=timedelta(hours=9))"
