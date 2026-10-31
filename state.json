@@ -1,33 +1,5 @@
 {
-  "confirmed": {
-    "1BED|2027-08-14|5": {
-      "checkin": "2027-08-14",
-      "first_seen": "2026-10-17T11:32:02.016426+00:00",
-      "nights": 5,
-      "price": 1770,
-      "room": "1BED",
-      "room_name": "One Bedroom Apartment",
-      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=5&rooms=1&adults=2&children=2&infants=0"
-    },
-    "1BED|2027-08-14|6": {
-      "checkin": "2027-08-14",
-      "first_seen": "2026-10-17T11:32:02.016426+00:00",
-      "nights": 6,
-      "price": 1770,
-      "room": "1BED",
-      "room_name": "One Bedroom Apartment",
-      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-14&nights=6&rooms=1&adults=2&children=2&infants=0"
-    },
-    "1BED|2027-08-15|5": {
-      "checkin": "2027-08-15",
-      "first_seen": "2026-10-17T11:32:02.016426+00:00",
-      "nights": 5,
-      "price": 1475,
-      "room": "1BED",
-      "room_name": "One Bedroom Apartment",
-      "url": "https://aliathonaegean.reserve-online.net/?checkin=2027-08-15&nights=5&rooms=1&adults=2&children=2&infants=0"
-    }
-  },
+  "confirmed": {},
   "fail_count": 0,
   "grid": {
     "dates": [
@@ -53,8 +25,8 @@
         "nights": {
           "2027-08-14": 295,
           "2027-08-15": 295,
-          "2027-08-16": 295,
-          "2027-08-17": 295,
+          "2027-08-16": null,
+          "2027-08-17": null,
           "2027-08-18": 295,
           "2027-08-19": 295,
           "2027-08-20": null,
@@ -197,6 +169,6 @@
       }
     }
   },
-  "last_checked": "2026-10-31T12:14:44.969490+00:00",
-  "last_success": "2026-10-31T12:14:44.969490+00:00"
+  "last_checked": "2026-10-31T21:26:43.383901+00:00",
+  "last_success": "2026-10-31T21:26:43.383901+00:00"
 }
