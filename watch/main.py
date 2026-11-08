@@ -9,6 +9,7 @@ from typing import Callable
 
 from watch import config, history as history_mod, notify, pagecrypt, state as state_mod
 from watch import settings as settings_mod
+from watch.wording import plural, stays_summary
 from watch.client import FetchError, fetch_avl
 from watch.confirm import ConfirmedWindow, confirm
 from watch.finder import find_windows
@@ -63,15 +64,6 @@ def _entry(c: ConfirmedWindow, now: datetime) -> dict:
         "url": c.url,
         "first_seen": now.isoformat(),
     }
-
-
-def _describe(e: dict) -> str:
-    ci = date.fromisoformat(e["checkin"])
-    co = ci.fromordinal(ci.toordinal() + int(e["nights"]))
-    return (
-        f"{e['room_name']}: {ci:%a %d %b} -> {co:%a %d %b} "
-        f"({e['nights']} nights) EUR {e['price']:,}"
-    )
 
 
 def _finish(
@@ -157,7 +149,7 @@ def run(
         history_mod.save(history_path, history)
         log.info("price history: change recorded (%d snapshots)", len(history))
         if len(history) >= 2:
-            lines = history_mod.describe_change(
+            headline, lines = history_mod.summarize_change(
                 history[-2],
                 history[-1],
                 rooms=settings.rooms,
@@ -166,7 +158,7 @@ def run(
             )
             if lines:
                 notifier(
-                    "Aliathon: price change",
+                    headline,
                     "\n".join(lines),
                     click=config.BASE_URL + "/",
                     priority="default",
@@ -202,17 +194,28 @@ def run(
     new_keys = [k for k in confirmed_now if k not in previous]
     if new_keys:
         n = len(new_keys)
-        title = f"Aliathon: {n} bookable stay{'s' if n != 1 else ''}!"
-        body = "\n".join(_describe(confirmed_now[k]) for k in new_keys)
-        notifier(title, body, click=confirmed_now[new_keys[0]]["url"])
+        new_entries = [confirmed_now[k] for k in new_keys]
+        cheapest = min(new_entries, key=lambda e: e["price"])
+        title = f"Aliathon: {plural(n, 'bookable stay')}!"
+        body = "\n".join(stays_summary(new_entries))
+        if n > 1:
+            body += "\nTap to book the cheapest."
+        notifier(title, body, click=cheapest["url"])
         log.info("notified about %d new window(s)", n)
     gone = [k for k in previous if k not in confirmed_now]
     if gone:
         log.info("%d window(s) no longer available: %s", len(gone), ", ".join(gone))
         n = len(gone)
+        left = len(confirmed_now)
+        lines = stays_summary([previous[k] for k in gone])
+        lines.append(
+            f"Still bookable: {plural(left, 'stay')}, from EUR {min(e['price'] for e in confirmed_now.values()):,}."
+            if left
+            else "Nothing matching your search is bookable now."
+        )
         notifier(
-            f"Aliathon: {n} stay{'s' if n != 1 else ''} no longer bookable",
-            "\n".join(_describe(previous[k]) for k in gone),
+            f"Aliathon: {plural(n, 'stay')} no longer bookable",
+            "\n".join(lines),
             click=config.BASE_URL + "/",
             priority="default",
             tags="x",

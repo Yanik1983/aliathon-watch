@@ -30,8 +30,15 @@ push, cancelling the previous one, so polling stays at a true 10-minute cadence
 even when GitHub delays scheduled runs.
 
 Every change in the per-night grid of a watched room (price moved, nights
-opened or closed) sends one normal-priority "price change" notification
-listing what changed. The settings card can limit this to chosen board
+opened or closed) sends one normal-priority notification whose title says what
+happened ("nights sold out", "nights opened", "price drop", ...). It has one
+line per room naming the dates that changed, the per-night price moves per
+board package, and how many nights are still available from what price, e.g.
+`Superior One Bedroom Apartment: 15-24 Aug sold out (10 nights). 5 of 15 nights
+available, from €305/night (Breakfast).` Bookable / no-longer-bookable alerts
+list up to 4 stays one by one; more are summarised per room (count, check-in
+dates, nights, lowest price), and the "no longer bookable" alert ends with how
+many stays are still bookable. The settings card can limit this to chosen board
 packages, to improvements only (price down or nights opened), or switch it
 off. Bookable-stay alerts use high priority.
 

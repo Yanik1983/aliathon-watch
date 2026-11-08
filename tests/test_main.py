@@ -146,6 +146,12 @@ def test_disappear_then_reappear_notifies_again(tmp_path):
     st = run(fetch=FakeFetch(), notifier=n, state_path=sp, page_path=pp, now=NOW)
     assert st["confirmed"] == {}
     assert len(stays()) == 1
+    gone = n.sent[-1]
+    assert gone["title"] == "Aliathon: 1 stay no longer bookable"
+    assert gone["body"] == (
+        "One Bedroom Apartment: Fri 20 Aug -> Wed 25 Aug (5 nights), EUR 1,500\n"
+        "Nothing matching your search is bookable now."
+    )
     run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=n, state_path=sp, page_path=pp, now=NOW)
     assert len(stays()) == 2
 
@@ -253,10 +259,12 @@ def test_price_change_notifies(tmp_path):
     run(fetch=FakeFetch(after), notifier=notifier, state_path=sp, page_path=pp, now=NOW + timedelta(minutes=20))
     assert len(notifier.sent) == 1
     n = notifier.sent[0]
-    assert n["title"] == "Aliathon: price change"
+    assert n["title"] == "Aliathon: nights opened"
     assert n["priority"] == "default"
     # STD also changed but is not a watched room, so it is not mentioned.
-    assert n["body"] == "One Bedroom Apartment (Rate 1): €300, 1 night opened"
+    assert n["body"] == (
+        "One Bedroom Apartment: Sun 22 Aug now open. 3 of 15 nights available, from €300/night (Rate 1)."
+    )
 
 
 def _write_settings(tmp_path, rooms, lo, hi):
@@ -286,7 +294,9 @@ def test_price_change_only_mentions_selected_rooms(tmp_path):
     assert notifier.sent == []  # only STD changed
     after2 = {"1BED": days(20, 22), "STD": days(21, 22)}
     run(fetch=FakeFetch(after2), notifier=notifier, state_path=sp, page_path=pp, now=NOW + timedelta(minutes=20))
-    assert [n["body"] for n in notifier.sent] == ["One Bedroom Apartment (Rate 1): €300, 1 night opened"]
+    assert [n["body"] for n in notifier.sent] == [
+        "One Bedroom Apartment: Sun 22 Aug now open. 3 of 15 nights available, from €300/night (Rate 1)."
+    ]
 
 
 def test_settings_card_rendered_when_token_password_repo_set(tmp_path, monkeypatch):
