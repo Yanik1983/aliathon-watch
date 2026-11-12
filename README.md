@@ -38,7 +38,11 @@ board package, and how many nights are still available from what price, e.g.
 available, from €305/night (Breakfast).` Bookable / no-longer-bookable alerts
 list up to 4 stays one by one; more are summarised per room (count, check-in
 dates, nights, lowest price), and the "no longer bookable" alert ends with how
-many stays are still bookable. The settings card can limit this to chosen board
+many stays are still bookable.
+
+Each poll sends at most one push. When the same poll also finds new bookable
+stays (or stays that went away), the night changes are added under "Night
+changes" in that alert instead of arriving as a second notification. The settings card can limit this to chosen board
 packages, to improvements only (price down or nights opened), or switch it
 off. Bookable-stay alerts use high priority.
 

@@ -145,26 +145,18 @@ def run(
     st["fail_count"] = 0
     st["last_success"] = now.isoformat()
     st["grid"] = grid_to_json(grid)
+    change_title, change_lines = "", []
     if history_mod.append_if_changed(history, grid, now):
         history_mod.save(history_path, history)
         log.info("price history: change recorded (%d snapshots)", len(history))
         if len(history) >= 2:
-            headline, lines = history_mod.summarize_change(
+            change_title, change_lines = history_mod.summarize_change(
                 history[-2],
                 history[-1],
                 rooms=settings.rooms,
                 packages=settings.packages,
                 mode=settings.price_alerts,
             )
-            if lines:
-                notifier(
-                    headline,
-                    "\n".join(lines),
-                    click=config.BASE_URL + "/",
-                    priority="default",
-                    tags="chart_with_upwards_trend",
-                )
-                log.info("notified about %d price/availability change(s)", len(lines))
 
     candidates = find_windows(
         grid,
@@ -192,37 +184,69 @@ def run(
         confirmed_now[w.key] = entry
 
     new_keys = [k for k in confirmed_now if k not in previous]
-    if new_keys:
-        n = len(new_keys)
-        new_entries = [confirmed_now[k] for k in new_keys]
-        cheapest = min(new_entries, key=lambda e: e["price"])
-        title = f"Aliathon: {plural(n, 'bookable stay')}!"
-        body = "\n".join(stays_summary(new_entries))
-        if n > 1:
-            body += "\nTap to book the cheapest."
-        notifier(title, body, click=cheapest["url"])
-        log.info("notified about %d new window(s)", n)
     gone = [k for k in previous if k not in confirmed_now]
     if gone:
         log.info("%d window(s) no longer available: %s", len(gone), ", ".join(gone))
-        n = len(gone)
-        left = len(confirmed_now)
-        lines = stays_summary([previous[k] for k in gone])
-        lines.append(
-            f"Still bookable: {plural(left, 'stay')}, from EUR {min(e['price'] for e in confirmed_now.values()):,}."
-            if left
-            else "Nothing matching your search is bookable now."
-        )
-        notifier(
-            f"Aliathon: {plural(n, 'stay')} no longer bookable",
-            "\n".join(lines),
-            click=config.BASE_URL + "/",
-            priority="default",
-            tags="x",
-        )
+    _notify_poll(
+        notifier,
+        [confirmed_now[k] for k in new_keys],
+        [previous[k] for k in gone],
+        confirmed_now,
+        change_title,
+        change_lines,
+    )
 
     st["confirmed"] = confirmed_now
     return _finish(st, grid, state_path, page_path, now, history, settings)
+
+
+def _notify_poll(
+    notifier: Notifier,
+    new: list[dict],
+    gone: list[dict],
+    confirmed_now: dict,
+    change_title: str,
+    change_lines: list[str],
+) -> None:
+    """At most one push per poll.
+
+    Bookable stays come first (high priority, tap opens the cheapest); stays
+    that went away and per-night changes from the same poll are added to that
+    one message instead of being sent separately.
+    """
+    sections: list[list[str]] = []
+    if new:
+        cheapest = min(new, key=lambda e: e["price"])
+        title = f"Aliathon: {plural(len(new), 'bookable stay')}!"
+        sections.append(stays_summary(new) + (["Tap to book the cheapest."] if len(new) > 1 else []))
+        if gone:
+            sections.append([f"No longer bookable: {plural(len(gone), 'stay')}."])
+        kwargs: dict = {"click": cheapest["url"]}
+    elif gone:
+        left = len(confirmed_now)
+        title = f"Aliathon: {plural(len(gone), 'stay')} no longer bookable"
+        sections.append(stays_summary(gone) + [
+            f"Still bookable: {plural(left, 'stay')}, from EUR {min(e['price'] for e in confirmed_now.values()):,}."
+            if left
+            else "Nothing matching your search is bookable now."
+        ])
+        kwargs = {"click": config.BASE_URL + "/", "priority": "default", "tags": "x"}
+    elif change_lines:
+        notifier(
+            change_title,
+            "\n".join(change_lines),
+            click=config.BASE_URL + "/",
+            priority="default",
+            tags="chart_with_upwards_trend",
+        )
+        log.info("notified about %d price/availability change(s)", len(change_lines))
+        return
+    else:
+        return
+    if change_lines:
+        sections.append([f"Night changes ({change_title.removeprefix('Aliathon: ')}):"] + change_lines)
+    notifier(title, "\n\n".join("\n".join(sec) for sec in sections), **kwargs)
+    log.info("notified: %s", title)
 
 
 def main() -> int:

@@ -148,9 +148,9 @@ def test_disappear_then_reappear_notifies_again(tmp_path):
     assert len(stays()) == 1
     gone = n.sent[-1]
     assert gone["title"] == "Aliathon: 1 stay no longer bookable"
-    assert gone["body"] == (
+    assert gone["body"].startswith(
         "One Bedroom Apartment: Fri 20 Aug -> Wed 25 Aug (5 nights), EUR 1,500\n"
-        "Nothing matching your search is bookable now."
+        "Nothing matching your search is bookable now.\n\nNight changes (availability changed):\n"
     )
     run(fetch=FakeFetch({"1BED": days(20, 24)}), notifier=n, state_path=sp, page_path=pp, now=NOW)
     assert len(stays()) == 2
@@ -366,3 +366,21 @@ def test_price_alert_mode_off_silences_price_pushes(tmp_path):
     run(fetch=FakeFetch({"1BED": days(20, 22)}), notifier=notifier, state_path=sp, page_path=pp,
         now=NOW + timedelta(minutes=10))
     assert not [n for n in notifier.sent if n["title"] == "Aliathon: price change"]
+
+
+def test_one_push_per_poll_when_stays_and_nights_change(tmp_path):
+    """Nights opening that create bookable stays: one high-priority push, not two."""
+    sp, pp = paths(tmp_path)
+    n = FakeNotifier()
+    run(fetch=FakeFetch(), notifier=n, state_path=sp, page_path=pp, now=NOW)
+    sent_before = len(n.sent)
+    run(fetch=FakeFetch({"1BED": days(14, 19)}), notifier=n, state_path=sp, page_path=pp,
+        now=NOW + timedelta(minutes=10))
+    assert len(n.sent) == sent_before + 1
+    msg = n.sent[-1]
+    assert msg["title"] == "Aliathon: 3 bookable stays!"
+    assert msg["priority"] == "high"
+    stays, changes = msg["body"].split("\n\n")
+    assert stays.endswith("Tap to book the cheapest.")
+    assert changes.startswith("Night changes (")
+    assert "One Bedroom Apartment: " in changes
